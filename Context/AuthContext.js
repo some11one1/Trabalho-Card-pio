@@ -1,5 +1,6 @@
 //AuthContext é um autenticador que guarda o estado do usuario (logado ou não, e se é admin ou não)
 import { createContext, useState } from "react";
+import { Alert, Platform } from "react-native";
 import { supabase } from "../Supabase";
 export const AuthContext = createContext(); //cria o contexto
 
@@ -54,13 +55,54 @@ export const AuthProvider = ({ children }) => { // children é todo o app
     }
     return true; // retorna que deu certo, isso significa que o usuario foi criado com sucesso
   };
+  const [usuarios, setUsuarios] = useState([]);
+const DeletarUsuario = async (userId) => {
+     if (user && user.id === userId) {
+       if (Platform.OS === "web") {
+         alert(
+           "Você não pode deletar você mesmo. seu curioso, achou que ia conseguir? achou errado ótario"
+         );
+       } else {
+         Alert.alert(
+           "Erro",
+           "Você não pode deletar você mesmo. seu curioso, achou que ia conseguir? achou errado ótario"
+         );
+       }
+       return false; // impede o usuario de se deletar
+     }
+    const { data, error } = await supabase
+      .from("usuarios")
+      .delete()
+      .eq("id", userId);
+    if (error) {
+      console.log("Erro ao deletar usuario:", error);
+      return false;
+    }
 
+ 
+    setUsuarios(usuarios.filter((usuario) => usuario.id !== userId)); 
+// usuario.id → pega o id do usuário atual que está sendo analisado.
+//userId → é o id do usuário que acabaram  de  serem deletados.
+//ou sejas, ele ta mantendo na lista só os usuarios que não foram deletados, filtrando. depois do => ele diz que se o id do usuario for diferente do id do usuario deletado, mantem ele na lista
+    return true;
+  };
+  const ListarUsuarios = async () => {
+    const { data, error } = await supabase
+      .from("usuarios")
+      .select("*");
+    if (error) {
+      console.log("Erro ao listar usuarios:", error);
+      return []; // retorna array vazio em caso de erro
+    }
+    setUsuarios(data); // atualiza o estado com a lista de usuarios
+    return data;
+    }
   // retorna o user (estado do usuario), loginUser (função de logar), logout (função de deslogar) e CriarUsuario (função de criar usuario) pro resto do app
   //como por exemplo  foi usado no App.js e o Login.js
  
   return (
     <AuthContext.Provider
-      value={{ user, loginUser, logout, CriarUsuario }}
+      value={{ user, loginUser, logout, CriarUsuario, DeletarUsuario, ListarUsuarios, usuarios }}
     >
        
     {children}
