@@ -1,4 +1,4 @@
-import { View, Text, Button, TextInput, Alert,  } from "react-native"; //  >>>>> não esquece de importar aqui se for colocar coisas tipo TouchableOpacity
+import { View, Text, Button, TextInput, Alert, StyleSheet, Image, TouchableOpacity  } from "react-native"; //  >>>>> não esquece de importar aqui se for colocar coisas tipo TouchableOpacity
 import  { AuthContext } from "../Context/AuthContext";
 import React, { useContext } from "react";
 export default function Login() {
@@ -24,21 +24,71 @@ export default function Login() {
 
   // não precisa explicar isso nem o resto, né
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+    <View style={styles.container}>
+      <Image
+        source={require('../assets/logo.png')}
+        style={styles.logo}
+        resizeMode='contain'
+      />
+      <Text style={{ color: "#ffffff", fontWeight: "bold", fontSize: 32, marginBottom: '10%'}}>
+        FEED
+        <Text style={{ color: "#2D7BFF" }}>HUB</Text>
+      </Text>
       <TextInput
-        style={{ borderWidth: 1, borderColor: "black", width: 150, height: 25 }}
+        style={styles.inputname}
         placeholder="Usuario"
         value={username} //o valor do input é o estado do username
         onChangeText={setUsername} //quando o texto mudar, atualiza o estado do username
       />
       <TextInput
-        style={{ borderWidth: 1, borderColor: "black", width: 150, height: 25 }}
+        style={styles.inputname}
         placeholder="Senha"
         value={senha} // mesma coisa pra senha
         onChangeText={setSenha}
       />
       {/* quando clicar no botão, chama a função de logar */}
-      <Button title="Login" onPress={handleLogin} />
+      <TouchableOpacity style={styles.button_send} onPress={handleLogin}>
+        <Text style={styles.text_white} >Logar</Text>
+      </TouchableOpacity>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1a1a1aff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  inputname: {
+    width: '50%',
+    backgroundColor: '#6e6e6eff',
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 12,
+    color: '#ffffffff',
+    marginBottom: 10,
+  },
+
+  button_send: {
+    width: '20%',
+    height: 40,
+    backgroundColor: '#067EC9',
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+
+  logo: {
+    width: '19%',
+    height: '9%',
+    
+  },
+  text_white: {
+    fontWeight: 'bold',
+    color: 'white',
+  }
+});
