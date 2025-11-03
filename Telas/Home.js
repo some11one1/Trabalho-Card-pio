@@ -2,13 +2,8 @@ import { View, Text } from "react-native"; //  >>>>> não esquece de importar aq
 import React, { useContext } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { ProdutosContext } from "../Context/produtoContext";
-import { useEffect } from "react";
 export default function Home() {
   const { produtos, listarProdutos } = useContext(ProdutosContext);
-  useEffect(() => {
-    // Atualiza o título do documento usando a API do navegador
-    listarProdutos();
-  }, []);
   const { tema } = usarTheme();
   return (
     <View

@@ -8,7 +8,11 @@ export const ProdutosProvider = ({ children }) => {
   const [produtos, setProdutos] = useState([]);
 
   const listarProdutos = async () => {
-    const { data, error } = await supabase.from("produtos").select("*");
+    const { data, error } = await supabase
+      .from("produtos")
+      .select("*")
+      .eq(Ativo, true);
+
     if (error) {
       console.log("Erro ao listar produtos:", error);
       return [];

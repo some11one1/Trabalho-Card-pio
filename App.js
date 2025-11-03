@@ -41,9 +41,21 @@ export const UserTabs = () => {
         tabBarInactiveTintColor: tema.texto,
       }}
     >
-      <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Histórico" component={Historico} />
-      <Tab.Screen name="Configurações" component={Configuracoes} />
+      <Tab.Screen
+        name="Home"
+        component={Home}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="Histórico"
+        component={Historico}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="Configurações"
+        component={Configuracoes}
+        options={{ headerShown: false }}
+      />
     </Tab.Navigator>
   );
 };
@@ -64,9 +76,21 @@ export const AdminTabs = () => {
         tabBarInactiveTintColor: temaAdaptativoTexto, // muda a cor do texto inativo (inativo = quando nao selecionado) da tab conforme o tema
       }}
     >
-      <Tab.Screen name="Gerenciar Cardápio" component={AdminHome} />
-      <Tab.Screen name="Configurar Usuários" component={ConfigUsuarios} />
-      <Tab.Screen name="Configurações" component={Configuracoes} />
+      <Tab.Screen
+        name="Gerenciar Cardápio"
+        component={AdminHome}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="Configurar Usuários"
+        component={ConfigUsuarios}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="Configurações"
+        component={Configuracoes}
+        options={{ headerShown: false }}
+      />
     </Tab.Navigator>
   );
 };
