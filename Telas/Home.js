@@ -1,31 +1,42 @@
-import { View, Text } from "react-native"; //  >>>>> não esquece de importar aqui se for colocar coisas tipo TouchableOpacity
+import { View, Text, StyleSheet } from "react-native"; //  >>>>> não esquece de importar aqui se for colocar coisas tipo TouchableOpacity
 import React, { useContext } from "react";
 import { usarTheme } from "../Context/ThemeContext";
-import { ProdutosContext } from "../Context/produtoContext";
-import { useEffect } from "react";
+import { ProdutosContext, } from "../Context/produtoContext";
 export default function Home() {
   const { produtos, listarProdutos } = useContext(ProdutosContext);
-  useEffect(() => {
-    // Atualiza o título do documento usando a API do navegador
-    listarProdutos();
-  }, []);
+
   const { tema } = usarTheme();
   return (
     <View
-      style={{
-        flex: 1,
+      style={{flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: tema.background,
-      }}
+        backgroundColor: tema.background,}}
     >
       <View>
+        <Text style={{ color: tema.texto}}>
+          ssssssssssssssss
+        </Text>
         {produtos.map((p) => (
-          <Text key={p.id} style={{ color: tema.texto }}>
+          <Text key={p.id} style={{color: tema.texto}}>
             {p.Nome} - R$ {p.Valor}
           </Text>
         ))}
       </View>
     </View>
   );
+
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+
+  },
+
+  text_white: {
+    
+  }
+}); 

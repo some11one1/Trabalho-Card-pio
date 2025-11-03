@@ -20,6 +20,7 @@ import Configuracoes from "./Telas/Configuracoes";
 import React, { useContext } from "react";
 import { Alert, Platform } from "react-native";
 import { ProdutosProvider } from "./Context/produtoContext";
+import { Button } from "react-native-web";
 
 // Tabs
 
@@ -33,6 +34,7 @@ export const UserTabs = () => {
   const { tema } = usarTheme();
   return (
     <Tab.Navigator
+
       screenOptions={{
         headerStyle: { backgroundColor: tema.background },
         headerTintColor: tema.texto,
@@ -41,9 +43,20 @@ export const UserTabs = () => {
         tabBarInactiveTintColor: tema.texto,
       }}
     >
-      <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Histórico" component={Historico} />
-      <Tab.Screen name="Configurações" component={Configuracoes} />
+      <Tab.Screen name="Home" component={Home}     options={({ navigation,
+        headerShown: false,
+        
+        headerLeft: () => {
+          <Button title="ssAS"></Button>
+        }
+      })}
+      />
+      <Tab.Screen name="Histórico" component={Historico}     options={{
+      headerShown: false
+    }} />
+      <Tab.Screen name="Configurações" component={Configuracoes}     options={{
+      headerShown: false
+    }} />
     </Tab.Navigator>
   );
 };
@@ -111,6 +124,16 @@ const HomeDrawer = () => {
       <Drawer.Screen
         name="Home"
         component={user?.role === "admin" ? AdminTabs : UserTabs}
+        options={({ navigation }) => ({
+          headerShown: false, 
+          
+          headerLeft: () => (
+            <Button 
+              title="Menu" 
+              onPress={() => navigation.toggleDrawer && navigation.toggleDrawer()} 
+            />
+          ),
+      })}
       />
       <Drawer.Screen name="Perfil" component={Perfil} />
       <Drawer.Screen name="Sobre" component={Sobre} />
