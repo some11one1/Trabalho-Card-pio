@@ -23,11 +23,11 @@ import { ProdutosProvider } from "./Context/produtoContext";
 import { Button } from "react-native-web";
 import { WalletContext, WalletProvider } from "./Context/WalletContext";
 
-
 import CardProduto from "./Componentes/CardProduto";
 
 import NvouEscreverTdDnv from "./Telas/TelinhaEspecialProDiegoVerOSaldoSumindo";
 import { SegredoProvider } from "./indexx";
+import { HistoricoProvider } from "./Context/HistoricoContext";
 // Tabs
 
 //cada Tab.Screen é uma aba, com nome e componente, componente é o que foi importando lá em cima, tem que ser mesmo nome, já o name tanto faz
@@ -89,9 +89,13 @@ export const AdminTabs = () => {
         tabBarInactiveTintColor: temaAdaptativoTexto, // muda a cor do texto inativo (inativo = quando nao selecionado) da tab conforme o tema
       }}
     >
-      <Tab.Screen name="Gerenciar Cardápio" component={AdminHome} options={{
-      headerShown: false
-    }} />
+      <Tab.Screen
+        name="Gerenciar Cardápio"
+        component={AdminHome}
+        options={{
+          headerShown: false,
+        }}
+      />
       <Tab.Screen name="Configurar Usuários" component={ConfigUsuarios} />
       <Tab.Screen name="Configurações" component={Configuracoes} />
     </Tab.Navigator>
@@ -139,20 +143,23 @@ const HomeDrawer = () => {
         name="Home"
         component={user?.role === "admin" ? AdminTabs : UserTabs}
         options={({ navigation }) => ({
-          headerShown: false, 
-          
+          headerShown: false,
+
           headerLeft: () => (
-            <Button 
-              title="Menu" 
-              onPress={() => navigation.toggleDrawer && navigation.toggleDrawer()} 
+            <Button
+              title="Menu"
+              onPress={() =>
+                navigation.toggleDrawer && navigation.toggleDrawer()
+              }
             />
           ),
-      })}
+        })}
       />
       <Drawer.Screen name="Perfil" component={Perfil} />
       <Drawer.Screen name="Sobre" component={Sobre} />
-      <Drawer.Screen name= "diego" component={NvouEscreverTdDnv} />
-        <Drawer.Screen name="sair"
+      <Drawer.Screen name="diego" component={NvouEscreverTdDnv} />
+      <Drawer.Screen
+        name="sair"
         component={() => null} //componente nulo pq n tem tela pro logout
         options={{
           drawerLabel: "Sair", //nome que aparece no drawer
@@ -189,18 +196,18 @@ const AppStack = () => {
 // App principal
 export default function App() {
   return (
-
-      <ThemeProvider>
-        <AuthProvider>
-          <WalletProvider>
-            <ProdutosProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <WalletProvider>
+          <ProdutosProvider>
+            <HistoricoProvider>
               <NavigationContainer>
                 <AppStack />
               </NavigationContainer>
-            </ProdutosProvider>
-          </WalletProvider>
-        </AuthProvider>
-      </ThemeProvider>
- 
+            </HistoricoProvider>
+          </ProdutosProvider>
+        </WalletProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
