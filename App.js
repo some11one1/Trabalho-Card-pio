@@ -21,7 +21,13 @@ import React, { useContext } from "react";
 import { Alert, Platform } from "react-native";
 import { ProdutosProvider } from "./Context/produtoContext";
 import { Button } from "react-native-web";
+import { WalletContext, WalletProvider } from "./Context/WalletContext";
 
+
+import CardProduto from "./Componentes/CardProduto";
+
+import NvouEscreverTdDnv from "./Telas/TelinhaEspecialProDiegoVerOSaldoSumindo";
+import { SegredoProvider } from "./indexx";
 // Tabs
 
 //cada Tab.Screen é uma aba, com nome e componente, componente é o que foi importando lá em cima, tem que ser mesmo nome, já o name tanto faz
@@ -34,7 +40,6 @@ export const UserTabs = () => {
   const { tema } = usarTheme();
   return (
     <Tab.Navigator
-
       screenOptions={{
         headerStyle: { backgroundColor: tema.background },
         headerTintColor: tema.texto,
@@ -43,16 +48,27 @@ export const UserTabs = () => {
         tabBarInactiveTintColor: tema.texto,
       }}
     >
-      <Tab.Screen name="Home" component={Home}     options={({ navigation,
-        headerShown: false,
-      })}
+      <Tab.Screen
+        name="Home"
+        component={Home}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
       />
-      <Tab.Screen name="Histórico" component={Historico}     options={{
-      headerShown: false
-    }} />
-      <Tab.Screen name="Configurações" component={Configuracoes}     options={{
-      headerShown: false
-    }} />
+      <Tab.Screen
+        name="Histórico"
+        component={Historico}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
+      />
+      <Tab.Screen
+        name="Configurações"
+        component={Configuracoes}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
+      />
     </Tab.Navigator>
   );
 };
@@ -135,9 +151,8 @@ const HomeDrawer = () => {
       />
       <Drawer.Screen name="Perfil" component={Perfil} />
       <Drawer.Screen name="Sobre" component={Sobre} />
-
-      <Drawer.Screen
-        name="sair"
+      <Drawer.Screen name= "diego" component={NvouEscreverTdDnv} />
+        <Drawer.Screen name="sair"
         component={() => null} //componente nulo pq n tem tela pro logout
         options={{
           drawerLabel: "Sair", //nome que aparece no drawer
@@ -166,6 +181,7 @@ const AppStack = () => {
       ) : (
         <Stack.Screen name="HomeDrawer" component={HomeDrawer} />
       )}
+      <Stack.Screen name="CardProduto" component={CardProduto} />
     </Stack.Navigator>
   );
 };
@@ -173,14 +189,18 @@ const AppStack = () => {
 // App principal
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ProdutosProvider>
-          <NavigationContainer>
-            <AppStack />
-          </NavigationContainer>
-        </ProdutosProvider>
-      </AuthProvider>
-    </ThemeProvider>
+
+      <ThemeProvider>
+        <AuthProvider>
+          <WalletProvider>
+            <ProdutosProvider>
+              <NavigationContainer>
+                <AppStack />
+              </NavigationContainer>
+            </ProdutosProvider>
+          </WalletProvider>
+        </AuthProvider>
+      </ThemeProvider>
+ 
   );
 }
