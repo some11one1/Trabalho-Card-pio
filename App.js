@@ -20,7 +20,14 @@ import Configuracoes from "./Telas/Configuracoes";
 import React, { useContext } from "react";
 import { Alert, Platform } from "react-native";
 import { ProdutosProvider } from "./Context/produtoContext";
+import { Button } from "react-native-web";
+import { WalletContext, WalletProvider } from "./Context/WalletContext";
 
+import CardProduto from "./Componentes/CardProduto";
+
+import NvouEscreverTdDnv from "./Telas/TelinhaEspecialProDiegoVerOSaldoSumindo";
+import { SegredoProvider } from "./indexx";
+import { HistoricoProvider } from "./Context/HistoricoContext";
 // Tabs
 
 //cada Tab.Screen é uma aba, com nome e componente, componente é o que foi importando lá em cima, tem que ser mesmo nome, já o name tanto faz
@@ -41,9 +48,27 @@ export const UserTabs = () => {
         tabBarInactiveTintColor: tema.texto,
       }}
     >
-      <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Histórico" component={Historico} />
-      <Tab.Screen name="Configurações" component={Configuracoes} />
+      <Tab.Screen
+        name="Home"
+        component={Home}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
+      />
+      <Tab.Screen
+        name="Histórico"
+        component={Historico}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
+      />
+      <Tab.Screen
+        name="Configurações"
+        component={Configuracoes}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
+      />
     </Tab.Navigator>
   );
 };
@@ -64,7 +89,13 @@ export const AdminTabs = () => {
         tabBarInactiveTintColor: temaAdaptativoTexto, // muda a cor do texto inativo (inativo = quando nao selecionado) da tab conforme o tema
       }}
     >
-      <Tab.Screen name="Gerenciar Cardápio" component={AdminHome} />
+      <Tab.Screen
+        name="Gerenciar Cardápio"
+        component={AdminHome}
+        options={{
+          headerShown: false,
+        }}
+      />
       <Tab.Screen name="Configurar Usuários" component={ConfigUsuarios} />
       <Tab.Screen name="Configurações" component={Configuracoes} />
     </Tab.Navigator>
@@ -111,10 +142,22 @@ const HomeDrawer = () => {
       <Drawer.Screen
         name="Home"
         component={user?.role === "admin" ? AdminTabs : UserTabs}
+        options={({ navigation }) => ({
+          headerShown: false,
+
+          headerLeft: () => (
+            <Button
+              title="Menu"
+              onPress={() =>
+                navigation.toggleDrawer && navigation.toggleDrawer()
+              }
+            />
+          ),
+        })}
       />
       <Drawer.Screen name="Perfil" component={Perfil} />
       <Drawer.Screen name="Sobre" component={Sobre} />
-
+      <Drawer.Screen name="diego" component={NvouEscreverTdDnv} />
       <Drawer.Screen
         name="sair"
         component={() => null} //componente nulo pq n tem tela pro logout
@@ -145,6 +188,7 @@ const AppStack = () => {
       ) : (
         <Stack.Screen name="HomeDrawer" component={HomeDrawer} />
       )}
+      <Stack.Screen name="CardProduto" component={CardProduto} />
     </Stack.Navigator>
   );
 };
@@ -154,11 +198,15 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <ProdutosProvider>
-          <NavigationContainer>
-            <AppStack />
-          </NavigationContainer>
-        </ProdutosProvider>
+        <WalletProvider>
+          <ProdutosProvider>
+            <HistoricoProvider>
+              <NavigationContainer>
+                <AppStack />
+              </NavigationContainer>
+            </HistoricoProvider>
+          </ProdutosProvider>
+        </WalletProvider>
       </AuthProvider>
     </ThemeProvider>
   );
