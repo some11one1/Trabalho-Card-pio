@@ -23,7 +23,7 @@ export const ThemeProvider = ({ children }) => {
     setIsModoEscuro((prevState) => !prevState);
     AsyncStorage.setItem("tema", !isModoEscuro ? "escuro" : "claro");
   };
-
+ 
   const tema = useMemo(() => {
     return {
       background: isModoEscuro ? "#121212" : "#EDEDED",
