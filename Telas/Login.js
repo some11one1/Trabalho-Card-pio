@@ -1,28 +1,33 @@
-import { View, Text, Button, TextInput, Alert, StyleSheet, Image, TouchableOpacity  } from "react-native"; //  >>>>> não esquece de importar aqui se for colocar coisas tipo TouchableOpacity
-import  { AuthContext } from "../Context/AuthContext";
-import React, { useContext } from "react";
+import { View, Text, Button, TextInput, Alert, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { AuthContext } from "../Context/AuthContext";
+import React, { useContext, useState } from "react";
+import { Feather } from "@expo/vector-icons";
+
 export default function Login() {
-  const { loginUser } = useContext(AuthContext)  // pega a função de logar do AuthContext
-  const [username, setUsername] = React.useState(""); // estado pro username e vai mudar com o input
-  const [senha, setSenha] = React.useState(""); // estado pra senha e vai mudar com o input
+  const { loginUser } = useContext(AuthContext);
+  const [username, setUsername] = React.useState("");
+  const [senha, setSenha] = React.useState(""); // Estado para senha (correto)
 
+  // Estado para controlar a visibilidade da senha
+  const [isSecure, setIsSecure] = useState(true);
 
-  const handleLogin = async () => { // é executada ao apertar no botao se um dos campos estiver vazio, avisa, mude isso depois pra ser um texto em baixo do input pra ficar melhor
+  // Função para alternar a visibilidade
+  const toggleVisibility = () => {
+    setIsSecure((prev) => !prev);
+  };
+
+  const handleLogin = async () => {
     if (!username || !senha) {
       Alert.alert("um dos campos está vazio.");
-      return; // se der errado, sai da função e nao continua o resto dela
+      return;
     }
-    
-    const sucesso = await loginUser(username, senha); // verifica  um dos campos estiver errado, avisa, mude  isso depois pra ser um texto em baixo do input pra ficar melhor
+
+    const sucesso = await loginUser(username, senha);
     if (!sucesso) {
       Alert.alert("Usuário ou senha incorretos. se vira ai pra saber qual");
     }
   }
-// se der certo, o Authconext atualiza o user automaticamente e vai mandar pro home 👍
 
-
-
-  // não precisa explicar isso nem o resto, né
   return (
     <View style={styles.container}>
       <Image
@@ -30,23 +35,39 @@ export default function Login() {
         style={styles.logo}
         resizeMode='contain'
       />
-      <Text style={{ color: "#ffffff", fontWeight: "bold", fontSize: 32, marginBottom: '10%'}}>
+      <Text style={{ color: "#ffffff", fontWeight: "bold", fontSize: 32, marginBottom: '10%' }}>
         FEED
         <Text style={{ color: "#2D7BFF" }}>HUB</Text>
       </Text>
       <TextInput
         style={styles.inputname}
         placeholder="Usuario"
-        value={username} //o valor do input é o estado do username
-        onChangeText={setUsername} //quando o texto mudar, atualiza o estado do username
+        value={username}
+        onChangeText={setUsername}
+        placeholderTextColor="#bbb"
       />
-      <TextInput
-        style={styles.inputname}
-        placeholder="Senha"
-        value={senha} // mesma coisa pra senha
-        onChangeText={setSenha}
-      />
-      {/* quando clicar no botão, chama a função de logar */}
+
+      {/* --- CAMPO DE SENHA MODIFICADO --- */}
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={styles.passwordInput}
+          placeholder="Senha"
+          value={senha}
+          onChangeText={setSenha}
+          secureTextEntry={isSecure} // Aplica o estado de visibilidade
+          placeholderTextColor="#bbb"
+        />
+        <TouchableOpacity onPress={toggleVisibility} style={styles.iconButton}>
+          <Feather
+            name={isSecure ? 'eye-off' : 'eye'} // Alterna o ícone,
+            size={22}
+            color="#ffffffff"
+            
+          />
+        </TouchableOpacity>
+      </View>
+      {/* --- FIM DO CAMPO DE SENHA --- */}
+
       <TouchableOpacity style={styles.button_send} onPress={handleLogin}>
         <Text style={styles.text_white} >Logar</Text>
       </TouchableOpacity>
@@ -62,7 +83,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  inputname: {
+  inputname: { // Para o "Usuario"
     width: '50%',
     backgroundColor: '#6e6e6eff',
     padding: 10,
@@ -70,7 +91,29 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     color: '#ffffffff',
     marginBottom: 10,
+    outlineWidth: 0,
   },
+
+  // --- NOVOS ESTILOS PARA SENHA ---
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '50%',
+    backgroundColor: '#6e6e6eff',
+    borderWidth: 1,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 5,
+    color: '#ffffffff',
+    outlineWidth: 0,
+  },
+  iconButton: {
+    padding: 10,
+  },
+  // --- FIM DOS NOVOS ESTILOS ---
 
   button_send: {
     width: '20%',
@@ -85,10 +128,9 @@ const styles = StyleSheet.create({
   logo: {
     width: '19%',
     height: '9%',
-    
   },
   text_white: {
     fontWeight: 'bold',
     color: 'white',
   }
-});
+}); 

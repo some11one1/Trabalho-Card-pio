@@ -7,6 +7,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 
 import { AuthProvider, AuthContext } from "./Context/AuthContext";
 import { ThemeProvider, usarTheme } from "./Context/ThemeContext";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import ConfigUsuarios from "./Telas/ConfigUsuarios";
 import AdminHome from "./Telas/AdminHome";
@@ -14,13 +15,24 @@ import Home from "./Telas/Home";
 import Login from "./Telas/Login";
 import Perfil from "./Telas/Perfil";
 import Historico from "./Telas/Historico";
+import Carrinho from "./Telas/Carrinho";
 import Sobre from "./Telas/Sobre";
 import Configuracoes from "./Telas/Configuracoes";
+import { FontAwesome } from "@expo/vector-icons";
 
 import React, { useContext } from "react";
 import { Alert, Platform } from "react-native";
 import { ProdutosProvider } from "./Context/produtoContext";
+import { Button } from "react-native-web";
+import { WalletContext, WalletProvider } from "./Context/WalletContext";
 
+import CardProduto from "./Componentes/CardProduto";
+import Pagamento from "./Componentes/Pagamento";
+
+import TelaTest from "./Telas/TelaTest";
+import { SegredoProvider } from "./indexx";
+import { HistoricoProvider } from "./Context/HistoricoContext";
+import { CarrinhoProvider } from "./Context/CarrinhoContext";
 // Tabs
 
 //cada Tab.Screen é uma aba, com nome e componente, componente é o que foi importando lá em cima, tem que ser mesmo nome, já o name tanto faz
@@ -31,19 +43,63 @@ const Tab = createBottomTabNavigator(); // o const Tab cria o navegador de abas 
 
 export const UserTabs = () => {
   const { tema } = usarTheme();
+
+  const tamanhoIcone = 20;
+
+  const renderIcon =
+    (name) =>
+    ({ focused, color, size }) => {
+      // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
+      return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
+    };
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerStyle: { backgroundColor: tema.background },
         headerTintColor: tema.texto,
-        tabBarStyle: { backgroundColor: tema.background },
+        tabBarStyle: { backgroundColor: tema.background, height: 70 },
         tabBarActiveTintColor: tema.textoAtivo,
         tabBarInactiveTintColor: tema.texto,
+
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "bold",
+        },
       }}
     >
-      <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Histórico" component={Historico} />
-      <Tab.Screen name="Configurações" component={Configuracoes} />
+      <Tab.Screen
+        name="Home"
+        component={Home}
+        options={({ navigation }) => ({
+          headerShown: false,
+          tabBarIcon: renderIcon("home"),
+        })}
+      />
+      <Tab.Screen
+        name="Histórico"
+        component={Historico}
+        options={({ navigation }) => ({
+          headerShown: false,
+          tabBarIcon: renderIcon("history"),
+        })}
+      />
+      <Tab.Screen
+        name="Carrinho"
+        component={Carrinho}
+        options={({ navigation }) => ({
+          headerShown: false,
+          tabBarIcon: renderIcon("shopping-cart"),
+        })}
+      />
+      <Tab.Screen
+        name="Configurações"
+        component={Configuracoes}
+        options={({ navigation }) => ({
+          headerShown: false,
+          tabBarIcon: renderIcon("cog"),
+        })}
+      />
     </Tab.Navigator>
   );
 };
@@ -64,7 +120,13 @@ export const AdminTabs = () => {
         tabBarInactiveTintColor: temaAdaptativoTexto, // muda a cor do texto inativo (inativo = quando nao selecionado) da tab conforme o tema
       }}
     >
-      <Tab.Screen name="Gerenciar Cardápio" component={AdminHome} />
+      <Tab.Screen
+        name="Gerenciar Cardápio"
+        component={AdminHome}
+        options={{
+          headerShown: false,
+        }}
+      />
       <Tab.Screen name="Configurar Usuários" component={ConfigUsuarios} />
       <Tab.Screen name="Configurações" component={Configuracoes} />
     </Tab.Navigator>
@@ -111,10 +173,25 @@ const HomeDrawer = () => {
       <Drawer.Screen
         name="Home"
         component={user?.role === "admin" ? AdminTabs : UserTabs}
+        options={() => ({
+          headerShown: false,
+        })}
       />
-      <Drawer.Screen name="Perfil" component={Perfil} />
-      <Drawer.Screen name="Sobre" component={Sobre} />
-
+      <Drawer.Screen
+        name="Perfil"
+        component={Perfil}
+        options={() => ({
+          headerShown: false,
+        })}
+      />
+      <Drawer.Screen
+        name="Sobre"
+        component={Sobre}
+        options={() => ({
+          headerShown: false,
+        })}
+      />
+      <Drawer.Screen name="TelaTest" component={TelaTest} />
       <Drawer.Screen
         name="sair"
         component={() => null} //componente nulo pq n tem tela pro logout
@@ -145,6 +222,8 @@ const AppStack = () => {
       ) : (
         <Stack.Screen name="HomeDrawer" component={HomeDrawer} />
       )}
+      <Stack.Screen name="CardProduto" component={CardProduto} />
+      <Stack.Screen name="Pagamento" component={Pagamento} />
     </Stack.Navigator>
   );
 };
@@ -152,14 +231,22 @@ const AppStack = () => {
 // App principal
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ProdutosProvider>
-          <NavigationContainer>
-            <AppStack />
-          </NavigationContainer>
-        </ProdutosProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <WalletProvider>
+            <ProdutosProvider>
+              <CarrinhoProvider>
+                <HistoricoProvider>
+                  <NavigationContainer>
+                    <AppStack />
+                  </NavigationContainer>
+                </HistoricoProvider>
+              </CarrinhoProvider>
+            </ProdutosProvider>
+          </WalletProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
