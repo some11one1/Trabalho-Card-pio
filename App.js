@@ -46,10 +46,12 @@ export const UserTabs = () => {
 
   const tamanhoIcone = 20;
 
-  const renderIcon = (name) => ({ focused, color, size }) => {
-    // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
-    return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
-  };
+  const renderIcon =
+    (name) =>
+    ({ focused, color, size }) => {
+      // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
+      return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
+    };
 
   return (
     <Tab.Navigator
@@ -175,14 +177,20 @@ const HomeDrawer = () => {
           headerShown: false,
         })}
       />
-      <Drawer.Screen name="Perfil" component={Perfil}
-      options={() => ({
-        headerShown: false,
-      })} />
-      <Drawer.Screen name="Sobre" component={Sobre}
-      options={() => ({
-        headerShown: false,
-      })} />
+      <Drawer.Screen
+        name="Perfil"
+        component={Perfil}
+        options={() => ({
+          headerShown: false,
+        })}
+      />
+      <Drawer.Screen
+        name="Sobre"
+        component={Sobre}
+        options={() => ({
+          headerShown: false,
+        })}
+      />
       <Drawer.Screen name="TelaTest" component={TelaTest} />
       <Drawer.Screen
         name="sair"
