@@ -27,7 +27,7 @@ export default function Configuracoes() {
     >
       <Text style={{ color: tema.texto }}>Tela de Configurações</Text>
       <Button title="Modo escuro/claro" onPress={TrocarTheme} />
-      <Button title="aaaaaaaa" onPress={() => setSegredo(!segredo)} />
+
       {segredo ? (
         <TextInput
           style={{ width: 100, height: 40, borderWidth: 1 }}
