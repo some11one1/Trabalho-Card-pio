@@ -45,7 +45,6 @@ export default function CardProduto({ navigation }) {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Button title="voltar" onPress={voltarTela}></Button>
-
       <Text>{produtoNome}</Text>
       <Text>ID do produto: {produtoId}</Text>
       <Text>Preço: R$ {produtoPreco}</Text>
@@ -54,9 +53,8 @@ export default function CardProduto({ navigation }) {
         title="Comprar"
         onPress={() =>
           navigation.navigate("Pagamento", {
-            produtoId,
-            produtoNome,
-            produtoPreco,
+            carrinho,
+            total,
           })
         }
       />
