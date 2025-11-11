@@ -7,7 +7,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 
 import { AuthProvider, AuthContext } from "./Context/AuthContext";
 import { ThemeProvider, usarTheme } from "./Context/ThemeContext";
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import ConfigUsuarios from "./Telas/ConfigUsuarios";
 import AdminHome from "./Telas/AdminHome";
@@ -15,10 +15,10 @@ import Home from "./Telas/Home";
 import Login from "./Telas/Login";
 import Perfil from "./Telas/Perfil";
 import Historico from "./Telas/Historico";
-import Carrinho from "./Telas/Historico";
+import Carrinho from "./Telas/Carrinho";
 import Sobre from "./Telas/Sobre";
 import Configuracoes from "./Telas/Configuracoes";
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome } from "@expo/vector-icons";
 
 import React, { useContext } from "react";
 import { Alert, Platform } from "react-native";
@@ -32,6 +32,7 @@ import Pagamento from "./Componentes/Pagamento";
 import TelaTest from "./Telas/TelaTest";
 import { SegredoProvider } from "./indexx";
 import { HistoricoProvider } from "./Context/HistoricoContext";
+import { CarrinhoProvider } from "./Context/CarrinhoContext";
 // Tabs
 
 //cada Tab.Screen é uma aba, com nome e componente, componente é o que foi importando lá em cima, tem que ser mesmo nome, já o name tanto faz
@@ -45,23 +46,25 @@ export const UserTabs = () => {
 
   const tamanhoIcone = 20;
 
-  const renderIcon = (name) => ({ focused, color, size }) => {
-    // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
-    return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
-  };
+  const renderIcon =
+    (name) =>
+    ({ focused, color, size }) => {
+      // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
+      return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
+    };
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerStyle: { backgroundColor: tema.background },
         headerTintColor: tema.texto,
-        tabBarStyle: { backgroundColor: tema.background, height: 70, },
+        tabBarStyle: { backgroundColor: tema.background, height: 70 },
         tabBarActiveTintColor: tema.textoAtivo,
         tabBarInactiveTintColor: tema.texto,
 
         tabBarLabelStyle: {
-          fontSize: 12, 
-          fontWeight: 'bold',
+          fontSize: 12,
+          fontWeight: "bold",
         },
       }}
     >
@@ -70,7 +73,7 @@ export const UserTabs = () => {
         component={Home}
         options={({ navigation }) => ({
           headerShown: false,
-          tabBarIcon: renderIcon('home'),
+          tabBarIcon: renderIcon("home"),
         })}
       />
       <Tab.Screen
@@ -78,7 +81,7 @@ export const UserTabs = () => {
         component={Historico}
         options={({ navigation }) => ({
           headerShown: false,
-          tabBarIcon: renderIcon('history'),
+          tabBarIcon: renderIcon("history"),
         })}
       />
       <Tab.Screen
@@ -86,7 +89,7 @@ export const UserTabs = () => {
         component={Carrinho}
         options={({ navigation }) => ({
           headerShown: false,
-          tabBarIcon: renderIcon('shopping-cart'),
+          tabBarIcon: renderIcon("shopping-cart"),
         })}
       />
       <Tab.Screen
@@ -94,7 +97,7 @@ export const UserTabs = () => {
         component={Configuracoes}
         options={({ navigation }) => ({
           headerShown: false,
-          tabBarIcon: renderIcon('cog'),
+          tabBarIcon: renderIcon("cog"),
         })}
       />
     </Tab.Navigator>
@@ -174,14 +177,20 @@ const HomeDrawer = () => {
           headerShown: false,
         })}
       />
-      <Drawer.Screen name="Perfil" component={Perfil}
-      options={() => ({
-        headerShown: false,
-      })} />
-      <Drawer.Screen name="Sobre" component={Sobre}
-      options={() => ({
-        headerShown: false,
-      })} />
+      <Drawer.Screen
+        name="Perfil"
+        component={Perfil}
+        options={() => ({
+          headerShown: false,
+        })}
+      />
+      <Drawer.Screen
+        name="Sobre"
+        component={Sobre}
+        options={() => ({
+          headerShown: false,
+        })}
+      />
       <Drawer.Screen name="TelaTest" component={TelaTest} />
       <Drawer.Screen
         name="sair"
@@ -223,19 +232,21 @@ const AppStack = () => {
 export default function App() {
   return (
     <SafeAreaProvider>
-    <ThemeProvider>
-      <AuthProvider>
-        <WalletProvider>
-          <ProdutosProvider>
-            <HistoricoProvider>
-              <NavigationContainer>
-                <AppStack />
-              </NavigationContainer>
-            </HistoricoProvider>
-          </ProdutosProvider>
-        </WalletProvider>
-      </AuthProvider>
-    </ThemeProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <WalletProvider>
+            <ProdutosProvider>
+              <CarrinhoProvider>
+                <HistoricoProvider>
+                  <NavigationContainer>
+                    <AppStack />
+                  </NavigationContainer>
+                </HistoricoProvider>
+              </CarrinhoProvider>
+            </ProdutosProvider>
+          </WalletProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
