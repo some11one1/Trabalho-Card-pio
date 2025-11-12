@@ -5,7 +5,7 @@ import { CarrinhoContext } from "../Context/CarrinhoContext";
 export default function Carrinho({ navigation }) {
   const { carrinho, limparCarrinho } = useContext(CarrinhoContext);
   const totalGeral = carrinho.reduce((sum, item) => sum + item.total, 0);
-
+  const qndtd = carrinho.reduce((sum, item) => item.quantidade + sum, 0)
   return (
     <View style={{ flex: 1, padding: 20 }}>
       <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 10 }}>
@@ -44,6 +44,7 @@ export default function Carrinho({ navigation }) {
               navigation.navigate("Pagamento", {
                 carrinho,
                 totalGeral,
+                qndtd
               })
             }
           />
