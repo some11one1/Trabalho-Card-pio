@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,13 +6,22 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
+import { useHistorico } from "../Context/HistoricoContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Entypo";
 import { usarTheme } from "../Context/ThemeContext";
+import { WalletContext } from "../Context/WalletContext";
+import { supabase } from "../Supabase";
+import { AuthContext } from "../Context/AuthContext";
 // FEITO POR IA, se inspire nela e re faça o código, essa tela será refeita, e essa tela é uma base para termos uma noção
 export default function Pagamento({ navigation, route }) {
+  const { ColocarNoHistorico } = useHistorico();
+  const { user } = useContext(AuthContext)
   const { tema } = usarTheme();
-
+  const { saldo, setSaldo, carregarSaldo} = useContext(WalletContext)
+     useEffect(() => {
+      carregarSaldo();
+    }, []);
   const {
     carrinho = null,
     totalGeral = null,
@@ -42,13 +51,37 @@ export default function Pagamento({ navigation, route }) {
     { id: "cartao", nome: "Cartão de Crédito", icone: "credit-card" },
     { id: "saldo", nome: "Saldo da Conta", icone: "wallet" },
   ];
-
-  const confirmarPagamento = () => {
+const valorCompra = totalGeral ?? produtoPreco;
+  const confirmarPagamento = async () => {
     if (!metodo) {
       alert("Selecione um método de pagamento");
       return;
+    } else if (metodo.nome == "Saldo da Conta") {
+      
+      if (saldo < valorCompra) {
+      alert('Saldo Insuficiente')
+      } else {
+          const novoSaldo = saldo - valorCompra;
+          setSaldo(novoSaldo);
+          const { error } = await supabase
+          .from("usuarios")
+          .update({ saldo: novoSaldo })
+          .eq("id", user.id);
+          if (error) {
+            alert("erro ao atualizar o saldo");
+            setSaldo(saldo);
+            return;
+          }
+        }
+    } 
+    // LEMBRAR DE COLOCAR MAIS INFORMAÇÕES  E MELHORES COMO QUANTIDADE PRODUTOS COMPRADO DURANTE UMA COMPRAR, e alias, ele só está pegando 1 produto por vez
+    if (carrinho) {
+      carrinho.forEach((item) => {
+        ColocarNoHistorico(item.id, item.nome, item.preco);
+      });
+    } else {
+      ColocarNoHistorico(produtoId, produtoNome, valorCompra);
     }
-
     alert(`Pagamento confirmado via ${metodo.nome}`);
     navigation.navigate("HomeDrawer");
   };

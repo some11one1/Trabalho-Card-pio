@@ -23,7 +23,7 @@ export function HistoricoProvider({ children }) {
     carregarHistorico();
   }, []);
 
-  async function ColocarNoHistorico(id, nome, preco) {
+  async function ColocarNoHistorico(id, nome, preco ) {
     try {
       const novoItem = { id, nome, preco, data: new Date() };
       const novoHistorico = [...historico, novoItem];

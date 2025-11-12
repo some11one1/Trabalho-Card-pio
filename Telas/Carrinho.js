@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import { View, Text, Button, FlatList } from "react-native";
 import { CarrinhoContext } from "../Context/CarrinhoContext";
-
 export default function Carrinho({ navigation }) {
   const { carrinho, limparCarrinho } = useContext(CarrinhoContext);
   const totalGeral = carrinho.reduce((sum, item) => sum + item.total, 0);
