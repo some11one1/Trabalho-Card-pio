@@ -41,6 +41,7 @@ export default function Home({ navigation, route }) {
           backgroundColor: tema.cardBackground,
           margin: margin,
           width: itemWidth,
+          borderColor: tema.borda,
         },
       ]}
       onPress={() =>
@@ -121,7 +122,6 @@ const styles = StyleSheet.create({
 
     borderRadius: 8, // Borda arredondada para visual moderno
     borderWidth: 1,
-    borderColor: "#ccc4", // Borda sutil
 
     padding: 5,
     alignItems: "center",

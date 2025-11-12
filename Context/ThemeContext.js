@@ -29,6 +29,8 @@ export const ThemeProvider = ({ children }) => {
       background: isModoEscuro ? "#121212" : "#EDEDED",
       texto: isModoEscuro ? "#EDEDED" : "#121212",
       textoAtivo: isModoEscuro ? "#869cfcff" : "#314096ff",
+      cardBackground: isModoEscuro ? "#000000" : "#FFFFFF",
+      borda: isModoEscuro ? "#ccc4" : "#080808",
     };
   }, [isModoEscuro]);
   return (

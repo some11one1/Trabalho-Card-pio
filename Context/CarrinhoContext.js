@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { usarTheme } from "../Context/ThemeContext";
 export const CarrinhoContext = createContext();
 
 export const CarrinhoProvider = ({ children }) => {
