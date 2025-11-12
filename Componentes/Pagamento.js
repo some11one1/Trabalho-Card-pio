@@ -83,7 +83,7 @@ const valorCompra = totalGeral ?? produtoPreco;
       ColocarNoHistorico(produtoId, produtoNome, valorCompra);
     }
     alert(`Pagamento confirmado via ${metodo.nome}`);
-    navigation.navigate("HomeDrawer");
+    navigation.goBack()
   };
 
   return (

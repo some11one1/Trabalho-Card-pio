@@ -6,9 +6,8 @@ import { Feather } from "@expo/vector-icons";
 export default function Login() {
   const { loginUser } = useContext(AuthContext);
   const [username, setUsername] = React.useState("");
-  const [senha, setSenha] = React.useState(""); // Estado para senha (correto)
+  const [senha, setSenha] = React.useState(""); 
 
-  // Estado para controlar a visibilidade da senha
   const [isSecure, setIsSecure] = useState(true);
 
   // Função para alternar a visibilidade
@@ -47,27 +46,25 @@ export default function Login() {
         placeholderTextColor="#bbb"
       />
 
-      {/* --- CAMPO DE SENHA MODIFICADO --- */}
+  
       <View style={styles.passwordContainer}>
         <TextInput
           style={styles.passwordInput}
           placeholder="Senha"
           value={senha}
           onChangeText={setSenha}
-          secureTextEntry={isSecure} // Aplica o estado de visibilidade
+          secureTextEntry={isSecure} 
           placeholderTextColor="#bbb"
         />
         <TouchableOpacity onPress={toggleVisibility} style={styles.iconButton}>
           <Feather
-            name={isSecure ? 'eye-off' : 'eye'} // Alterna o ícone,
+            name={isSecure ? 'eye-off' : 'eye'} 
             size={22}
             color="#ffffffff"
             
           />
         </TouchableOpacity>
       </View>
-      {/* --- FIM DO CAMPO DE SENHA --- */}
-
       <TouchableOpacity style={styles.button_send} onPress={handleLogin}>
         <Text style={styles.text_white} >Logar</Text>
       </TouchableOpacity>
@@ -83,7 +80,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  inputname: { // Para o "Usuario"
+  inputname: {
     width: '50%',
     backgroundColor: '#6e6e6eff',
     padding: 10,
@@ -94,7 +91,7 @@ const styles = StyleSheet.create({
     outlineWidth: 0,
   },
 
-  // --- NOVOS ESTILOS PARA SENHA ---
+
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -113,7 +110,7 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: 10,
   },
-  // --- FIM DOS NOVOS ESTILOS ---
+ 
 
   button_send: {
     width: '20%',

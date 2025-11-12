@@ -69,7 +69,7 @@ export const UserTabs = () => {
       }}
     >
       <Tab.Screen
-        name="Home"
+        name="HomeTab"
         component={Home}
         options={({ navigation }) => ({
           headerShown: false,
@@ -157,6 +157,9 @@ const HomeDrawer = () => {
       ]);
     }
   };
+  function FuncaoInutilSoPraResolverUmErroDaTelaDeSair() {
+    return null;
+  }
   return (
     <Drawer.Navigator
       screenOptions={() => ({
@@ -191,10 +194,11 @@ const HomeDrawer = () => {
           headerShown: false,
         })}
       />
+      
       <Drawer.Screen name="TelaTest" component={TelaTest} />
       <Drawer.Screen
         name="sair"
-        component={() => null} //componente nulo pq n tem tela pro logout
+        component={FuncaoInutilSoPraResolverUmErroDaTelaDeSair} //componente nulo pq n tem tela pro logout
         options={{
           drawerLabel: "Sair", //nome que aparece no drawer
         }}
