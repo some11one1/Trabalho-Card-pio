@@ -39,10 +39,15 @@ const anuncios = [
       { label: "APOSTE AGORA!", acao: () => console.log("Ir para SilkBet") },
     ],
   },
+  {
+    texto: "Avalie Nosso App em 5 Estrelas",
+    imagem: require("../assets/avaliacao.png"),
+    botoes: [{ label: "Avaliar", acao: () => console.log("avaliar") }],
+  },
 ];
 
 export default function Anuncio({ visivel, onFechar }) {
-  const { tema } = usarTheme()
+  const { tema } = usarTheme();
   const [anuncio, setAnuncio] = useState(null);
   const [botaoLiberado, setBotaoLiberado] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -75,7 +80,12 @@ export default function Anuncio({ visivel, onFechar }) {
   return (
     <Modal visible={visivel} transparent animationType="none">
       <View style={styles.overlay}>
-        <Animated.View style={[styles.card, { opacity: fadeAnim, backgroundColor: tema.background }]}>
+        <Animated.View
+          style={[
+            styles.card,
+            { opacity: fadeAnim, backgroundColor: tema.background },
+          ]}
+        >
           {/* Botão fechar no canto */}
           <TouchableOpacity
             onPress={botaoLiberado ? onFechar : null}
@@ -83,7 +93,11 @@ export default function Anuncio({ visivel, onFechar }) {
             style={styles.botaoFechar}
           >
             <Text
-              style={[styles.txtFechar, {color: tema.texto}, { opacity: botaoLiberado ? 1 : 0.4 }]}
+              style={[
+                styles.txtFechar,
+                { color: tema.texto },
+                { opacity: botaoLiberado ? 1 : 0.4 },
+              ]}
             >
               ✖
             </Text>
@@ -91,7 +105,9 @@ export default function Anuncio({ visivel, onFechar }) {
 
           {/* Imagem e texto */}
           <Image source={anuncio.imagem} style={styles.imagem} />
-          <Text style={[styles.texto, {color: tema.texto }]} >{anuncio.texto}</Text>
+          <Text style={[styles.texto, { color: tema.texto }]}>
+            {anuncio.texto}
+          </Text>
 
           {/* Renderizar botões personalizados */}
           <View style={styles.areaBotoes}>

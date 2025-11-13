@@ -5,17 +5,17 @@ const AnuncioContext = createContext();
 
 export function AnuncioProvider({ children }) {
   const [visivel, setVisivel] = useState(false);
-  const resolverRef = useRef(null); 
+  const resolverRef = useRef(null);
 
   const chanceMostrarAnuncio = () => {
     return new Promise((resolve) => {
       const chance = Math.random();
 
-      if (chance < 0.15) {
+      if (chance < 0.9) {
         resolverRef.current = resolve;
         setVisivel(true);
       } else {
-        resolve(); 
+        resolve();
       }
     });
   };
@@ -23,7 +23,7 @@ export function AnuncioProvider({ children }) {
   const fecharAnuncio = () => {
     setVisivel(false);
     if (resolverRef.current) {
-      resolverRef.current(); 
+      resolverRef.current();
       resolverRef.current = null;
     }
   };
