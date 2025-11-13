@@ -20,21 +20,19 @@ import Sobre from "./Telas/Sobre";
 import Configuracoes from "./Telas/Configuracoes";
 import { FontAwesome } from "@expo/vector-icons";
 
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Alert, Platform } from "react-native";
 import { ProdutosProvider } from "./Context/produtoContext";
 import { Button } from "react-native-web";
 import { WalletContext, WalletProvider } from "./Context/WalletContext";
-
 import CardProduto from "./Componentes/CardProduto";
 import Pagamento from "./Componentes/Pagamento";
 
-import TelaTest from "./Telas/TelaTest";
 import { SegredoProvider } from "./indexx";
 import { HistoricoProvider } from "./Context/HistoricoContext";
 import { CarrinhoProvider } from "./Context/CarrinhoContext";
+import { AnuncioProvider } from "./Context/AnuncioContext";
 // Tabs
-
 //cada Tab.Screen é uma aba, com nome e componente, componente é o que foi importando lá em cima, tem que ser mesmo nome, já o name tanto faz
 
 const Tab = createBottomTabNavigator(); // o const Tab cria o navegador de abas (tabs) é a coisa que fica la em baixo do app pra alterar entre si quando aperta, tipo home, historico, etc
@@ -195,7 +193,7 @@ const HomeDrawer = () => {
         })}
       />
       
-      <Drawer.Screen name="TelaTest" component={TelaTest} />
+
       <Drawer.Screen
         name="sair"
         component={FuncaoInutilSoPraResolverUmErroDaTelaDeSair} //componente nulo pq n tem tela pro logout
@@ -237,19 +235,21 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <AuthProvider>
-          <WalletProvider>
-            <ProdutosProvider>
-              <CarrinhoProvider>
-                <HistoricoProvider>
-                  <NavigationContainer>
-                    <AppStack />
-                  </NavigationContainer>
-                </HistoricoProvider>
-              </CarrinhoProvider>
-            </ProdutosProvider>
-          </WalletProvider>
-        </AuthProvider>
+        <AnuncioProvider>
+          <AuthProvider>
+            <WalletProvider>
+              <ProdutosProvider>
+                <CarrinhoProvider>
+                  <HistoricoProvider>
+                    <NavigationContainer>
+                      <AppStack />
+                    </NavigationContainer>
+                  </HistoricoProvider>
+                </CarrinhoProvider>
+              </ProdutosProvider>
+            </WalletProvider>
+          </AuthProvider>
+        </AnuncioProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

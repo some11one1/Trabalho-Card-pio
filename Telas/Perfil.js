@@ -3,14 +3,40 @@ import React, { useContext, useEffect, useState } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { WalletContext } from "../Context/WalletContext";
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { supabase } from "../Supabase";
 import  Nav_Menu from '../Componentes/nav_menu';
-
+import { AuthContext } from "../Context/AuthContext";
+import { useAnuncio } from "../Context/AnuncioContext";
 export default function Perfil() {
+  const { chanceMostrarAnuncio} = useAnuncio()
   const [modalVisivel, setModalVisivel] = useState(false)
-  const { saldo, carregarSaldo } = useContext(WalletContext);
+  const { saldo, setSaldo, carregarSaldo, saldoBanco, setSaldoBanco, carregarSaldoBanco} = useContext(WalletContext);
+  const { user } = useContext(AuthContext)
+
+  const confirmarRecarga = async (valor) => {
+    chanceMostrarAnuncio()
+    if (saldoBanco >= valor) {
+    const novoSaldo = saldo + valor
+    const novoSaldoBanco = saldoBanco - valor
+    setSaldo(novoSaldo)
+    setSaldoBanco(novoSaldoBanco)
+    const { error } = await supabase
+      .from("usuarios")
+      .update({ saldo: novoSaldo, saldoBanco: novoSaldoBanco })
+      .eq("id", user.id);
+   if (error) {
+    console.log("erro ao atualizar saldo");
+    setSaldo(saldo)
+    setSaldoBanco(saldoBanco)
+  }
+}else {
+   alert("ta sem dinheiro pobre")
+    console.log(saldoBanco)
+  }
+}
   useEffect(() => {
     carregarSaldo();
+    carregarSaldoBanco()
   }, []);
   const { tema } = usarTheme();
   return (
@@ -56,10 +82,7 @@ export default function Perfil() {
                   padding: 20,
                   alignItems: "center",
                   justifyContent: "center",
-                  elevation: 5, // sombra no Android
-                  shadowColor: "#000", // sombra no iOS
-                  shadowOpacity: 0.3,
-                  shadowRadius: 10,
+                  elevation: 5,
                 }}
               >
                 <Text style={{ fontSize: 18, marginBottom: 10 }}>
@@ -77,7 +100,7 @@ export default function Perfil() {
                     <View key={v} style={{ margin: 5 }}>
                       <Button
                         title={`R$${v}`}
-                        onPress={() => confirmarRecarga(v)}
+                        onPress={() => confirmarRecarga(Number(v))} //converte em numero
                       />
                     </View>
                   ))}

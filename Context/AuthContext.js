@@ -7,6 +7,7 @@ export const AuthContext = createContext(); //cria o contexto
 
 // cria o provider q é um coponente que envolve todo o app
 export const AuthProvider = ({ children }) => {
+  
   // children é todo o app
   //estado do usuario
   const [user, setUser] = useState(null); // cria um estado pro usuario, por padrão é null ou seja, ninguem logado

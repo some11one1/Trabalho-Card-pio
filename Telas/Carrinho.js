@@ -1,7 +1,9 @@
 import React, { useContext } from "react";
 import { View, Text, Button, FlatList } from "react-native";
 import { CarrinhoContext } from "../Context/CarrinhoContext";
+import { useAnuncio } from "../Context/AnuncioContext";
 export default function Carrinho({ navigation }) {
+  const { chanceMostrarAnuncio} = useAnuncio()
   const { carrinho, limparCarrinho } = useContext(CarrinhoContext);
   const totalGeral = carrinho.reduce((sum, item) => sum + item.total, 0);
   const qndtd = carrinho.reduce((sum, item) => item.quantidade + sum, 0)
@@ -39,15 +41,16 @@ export default function Carrinho({ navigation }) {
         <View>
           <Button
             title="Comprar"
-            onPress={() =>
+            onPress={async () => {
+               await chanceMostrarAnuncio();
               navigation.navigate("Pagamento", {
                 carrinho,
                 totalGeral,
                 qndtd
               })
-            }
+            }}
           />
-          <Button title="Limpar Carrinho" onPress={limparCarrinho} />
+          <Button title="Limpar Carrinho" onPress={async() => { await chanceMostrarAnuncio(); limparCarrinho()}} />
         </View>
       )}
       <Text style={{ fontSize: 18, fontWeight: "bold" }}>

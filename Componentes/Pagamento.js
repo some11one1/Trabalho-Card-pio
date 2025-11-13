@@ -13,10 +13,12 @@ import { usarTheme } from "../Context/ThemeContext";
 import { WalletContext } from "../Context/WalletContext";
 import { supabase } from "../Supabase";
 import { AuthContext } from "../Context/AuthContext";
+import { useAnuncio } from "../Context/AnuncioContext";
 // FEITO POR IA, se inspire nela e re faça o código, essa tela será refeita, e essa tela é uma base para termos uma noção
 export default function Pagamento({ navigation, route }) {
   const { ColocarNoHistorico } = useHistorico();
-  const { user } = useContext(AuthContext)
+  const { chanceMostrarAnuncio} = useAnuncio()
+const { user } = useContext(AuthContext)
   const { tema } = usarTheme();
   const { saldo, setSaldo, carregarSaldo} = useContext(WalletContext)
      useEffect(() => {
@@ -90,9 +92,11 @@ const valorCompra = totalGeral ?? produtoPreco;
     <SafeAreaView
       style={[styles.container, { backgroundColor: tema.background }]}
     >
-      {/* HEADER */}
+
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={async () => {
+          await chanceMostrarAnuncio();
+          navigation.goBack()}}>
           <Icon name="chevron-left" size={32} color={tema.texto} />
         </TouchableOpacity>
 
@@ -101,7 +105,7 @@ const valorCompra = totalGeral ?? produtoPreco;
         <View style={{ width: 32 }} />
       </View>
 
-      {/* LISTA DE ITENS */}
+
       <ScrollView
         style={{ width: "100%" }}
         contentContainerStyle={{ padding: 20 }}
@@ -130,7 +134,7 @@ const valorCompra = totalGeral ?? produtoPreco;
           </View>
         ))}
 
-        {/* MÉTODOS DE PAGAMENTO */}
+  
         <Text
           style={[
             styles.metodosTitulo,
@@ -151,7 +155,9 @@ const valorCompra = totalGeral ?? produtoPreco;
                 borderColor: tema.textoAtivo,
               },
             ]}
-            onPress={() => setMetodo(m)}
+            onPress={async () =>{
+              await chanceMostrarAnuncio();
+              setMetodo(m)}}
           >
             <Icon
               name={m.icone}
@@ -180,7 +186,9 @@ const valorCompra = totalGeral ?? produtoPreco;
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.btnComprar} onPress={confirmarPagamento}>
+        <TouchableOpacity style={styles.btnComprar} onPress={async() => {
+        await chanceMostrarAnuncio()
+          confirmarPagamento()}}>
           <Icon name="check" size={24} color="#FFF" />
           <Text style={styles.btnComprarTexto}>Confirmar Pagamento</Text>
         </TouchableOpacity>

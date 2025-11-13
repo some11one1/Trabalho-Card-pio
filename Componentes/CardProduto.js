@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Entypo";
-
+import { useAnuncio } from "../Context/AnuncioContext"
 import { useRoute } from "@react-navigation/native";
 import React, { useContext } from "react";
 
@@ -24,38 +24,23 @@ import { supabase } from "../Supabase";
 const { width } = Dimensions.get("window");
 
 export default function CardProduto({ navigation }) {
+   const { chanceMostrarAnuncio} = useAnuncio()
   const route = useRoute();
 
-  // Recebe todos os params
+
   const { produtoId, produtoPreco, produtoNome, produtoImg } = route.params;
 
-  // Contextos
+
   const { saldo, setSaldo } = useContext(WalletContext);
   const { user } = useContext(AuthContext);
   const { ColocarNoHistorico } = useHistorico();
   const { AdicionarAoCarrinho } = useContext(CarrinhoContext);
   const { tema } = usarTheme();
 
-  // Comprar produto
-  const comprar = async () => {
-    if (produtoPreco > saldo) {
-      Alert.alert("Saldo insuficiente");
-      return;
-    }
-
-    const novoSaldo = saldo - produtoPreco;
-    setSaldo(novoSaldo);
-
-    ColocarNoHistorico(produtoId, produtoNome, produtoPreco);
-
-    await supabase
-      .from("usuarios")
-      .update({ saldo: novoSaldo })
-      .eq("username", user.username);
-  };
-
-  // Adicionar no carrinho via contexto
-  const adicionarCarrinho = () => {
+  
+ 
+  const adicionarCarrinho = async () => {
+    await chanceMostrarAnuncio();
     AdicionarAoCarrinho(produtoId, produtoNome, produtoPreco);
   };
 
@@ -67,7 +52,7 @@ export default function CardProduto({ navigation }) {
         backgroundColor: tema.background,
       }}
     >
-      {/* Top Bar */}
+
       <View
         style={{
           width: "100%",
@@ -79,7 +64,9 @@ export default function CardProduto({ navigation }) {
           paddingHorizontal: 10,
         }}
       >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={async () => { 
+          await chanceMostrarAnuncio();
+          navigation.goBack()}}>
           <Icon name="chevron-left" color={tema.texto} size={34} />
         </TouchableOpacity>
 
@@ -98,24 +85,24 @@ export default function CardProduto({ navigation }) {
         <View style={{ width: 35 }} />
       </View>
 
-      {/* Imagem */}
+  
       <Image
         style={styles.img}
         source={{ uri: produtoImg }}
         resizeMode="cover"
       />
 
-      {/* Nome */}
+   
       <Text style={{ color: tema.texto, fontWeight: "bold", fontSize: 30 }}>
         {produtoNome}
       </Text>
 
-      {/* Preço */}
+
       <Text style={[{ color: tema.textoAtivo, fontSize: 34 }, styles.texto]}>
         R$ {produtoPreco.toFixed(2).replace(".", ",")}
       </Text>
 
-      {/* Saldo */}
+
       <View style={styles.saldoContainer}>
         <Text style={[styles.saldoLabel, { color: tema.texto }]}>
           Seu saldo:
@@ -130,7 +117,7 @@ export default function CardProduto({ navigation }) {
         </Text>
       </View>
 
-      {/* ID */}
+
       <Text
         style={[
           {
@@ -146,9 +133,9 @@ export default function CardProduto({ navigation }) {
         ID do produto: {produtoId}
       </Text>
 
-      {/* Botões */}
+   
       <View style={[styles.footerAcoes, { backgroundColor: tema.background }]}>
-        {/* Adicionar ao Carrinho */}
+  
         <TouchableOpacity
           onPress={adicionarCarrinho}
           style={[
@@ -165,14 +152,15 @@ export default function CardProduto({ navigation }) {
 
 
         <TouchableOpacity
-          onPress={() =>
+          onPress={async() => {
+            await chanceMostrarAnuncio();
             navigation.navigate("Pagamento", {
               produtoId,
               produtoNome,
               produtoPreco,
               produtoImg,
             })
-          }
+          }}
           style={[styles.btnAcao, styles.btnComprar]}
         >
           <Icon name="credit-card" color="#FFFFFF" size={25} />

@@ -1,15 +1,25 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { usarTheme } from "../Context/ThemeContext";
+import { AuthContext } from "./AuthContext";
+import {useAnuncio } from "./AnuncioContext";
 export const CarrinhoContext = createContext();
 
 export const CarrinhoProvider = ({ children }) => {
+  const {chanceMostrarAnuncio} = useAnuncio()
+   const { user } = useContext(AuthContext)
   const [carrinho, setCarrinho] = useState([]);
   const [carregando, setCarregando] = useState(true);
+ 
   useEffect(() => {
     const carregarCarrinho = async () => {
+      if (!user) {
+        setCarrinho([])
+        setCarregando(false)
+          return;
+      }
+       const chave = `carrinho_${user.id || user.username}`; 
       try {
-        const carrinhoSalvo = await AsyncStorage.getItem("carrinho");
+        const carrinhoSalvo = await AsyncStorage.getItem(chave);
         if (carrinhoSalvo) {
           setCarrinho(JSON.parse(carrinhoSalvo));
         }
@@ -20,9 +30,16 @@ export const CarrinhoProvider = ({ children }) => {
       }
     };
     carregarCarrinho();
-  }, []);
+  }, [user]);
+
+
+
 
   async function AdicionarAoCarrinho(id, nome, preco) {
+    if (!user) {
+      return;
+    }
+     const chave = `carrinho_${user.id || user.username}`;
     try {
       // Verifica se o produto já está no carrinho
       const itemExistente = carrinho.find((item) => item.id === id);
@@ -48,7 +65,7 @@ export const CarrinhoProvider = ({ children }) => {
 
       // Atualiza estado e salva no AsyncStorage
       setCarrinho(novoCarrinho);
-      await AsyncStorage.setItem("carrinho", JSON.stringify(novoCarrinho));
+      await AsyncStorage.setItem(chave, JSON.stringify(novoCarrinho));
     } catch (error) {
       console.log("Erro ao salvar no Carrinho:", error);
     }
@@ -56,8 +73,10 @@ export const CarrinhoProvider = ({ children }) => {
 
   // ? Limpa o carrinho
   const limparCarrinho = async () => {
+    if (!user) return;
+     const chave = `carrinho_${user.id || user.username}`;
     setCarrinho([]);
-    await AsyncStorage.removeItem("carrinho");
+    await AsyncStorage.removeItem(chave);
   };
 
   return (

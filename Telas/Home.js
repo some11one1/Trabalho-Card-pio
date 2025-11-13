@@ -7,6 +7,7 @@ import {
   Image,
   Dimensions,
 } from "react-native";
+import { useAnuncio } from "../Context/AnuncioContext";
 import React, { useContext, useEffect } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { ProdutosContext } from "../Context/produtoContext";
@@ -15,15 +16,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import Nav_Menu from "../Componentes/nav_menu";
 
-// Pega a largura da tela para cálculo dinâmico da largura do item
+
 const screenWidth = Dimensions.get("window").width;
 const numColumns = 3;
-const margin = 8; // Margem desejada entre os itens (8px)
+const margin = 8;
 
-// Calcula a largura de cada item para caber 3 por linha, considerando a margem
 const itemWidth = screenWidth / numColumns - margin * 2;
 
 export default function Home({ navigation, route }) {
+  const { chanceMostrarAnuncio} = useAnuncio()
   const { produtos, listarProdutos } = useContext(ProdutosContext);
   const { tema } = usarTheme();
 
@@ -31,9 +32,9 @@ export default function Home({ navigation, route }) {
     listarProdutos();
   }, []);
 
-  // Função que renderiza cada item na FlatList
+
   const renderProduto = ({ item }) => (
-    // 🚨 Aplicamos a largura calculada e a margem aqui
+
     <TouchableOpacity
       style={[
         styles.produtoItem,
@@ -44,20 +45,20 @@ export default function Home({ navigation, route }) {
           borderColor: tema.borda,
         },
       ]}
-      onPress={() =>
+      onPress={async () => {
+        await chanceMostrarAnuncio();
         navigation.navigate("CardProduto", {
           produtoId: item.id,
           produtoPreco: item.Valor,
           produtoNome: item.Nome,
           produtoImg: item.img,
         })
-      }
+      }}
     >
-      {/* 1. Imagem */}
       <Image
         style={styles.produtoImage}
         source={{ uri: item.img }}
-        resizeMode="cover" // Garante que a imagem se ajuste bem
+        resizeMode="cover" 
       />
 
       {/* 2. Informações (Nome e Preço) */}
@@ -85,9 +86,9 @@ export default function Home({ navigation, route }) {
         data={produtos}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderProduto}
-        // 🚨 Centralizamos o contêiner para alinhar a última linha
+      
         contentContainerStyle={styles.listaContainer}
-        numColumns={numColumns} // 3 Colunas
+        numColumns={numColumns} 
         ListEmptyComponent={() => (
           <View style={styles.vazioContainer}>
             <Text style={{ color: tema.texto }}>
@@ -115,18 +116,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexGrow: 1,
   },
-  // Estilo para CADA ITEM (TouchableOpacity)
+ 
   produtoItem: {
-    // Altura fixa para padronizar o grid
+   
     height: 180,
 
-    borderRadius: 8, // Borda arredondada para visual moderno
+    borderRadius: 8, 
     borderWidth: 1,
 
     padding: 5,
     alignItems: "center",
 
-    // Remove 'justifyContent: center' para forçar a imagem para cima
+   
   },
   produtoImage: {
     width: "90%",
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginBottom: 5,
   },
-  // Estilo para o Text (Nome e Valor)
+
   produtoInfo: {
     width: "100%",
     paddingHorizontal: 3,
@@ -142,10 +143,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   produtoNome: {
-    fontSize: 12, // Tamanho menor para caber 2 linhas
+    fontSize: 12, 
     fontWeight: "bold",
     textAlign: "center",
-    height: 30, // Reserva espaço para 2 linhas
+    height: 30, 
   },
   produtoValor: {
     fontSize: 14,
