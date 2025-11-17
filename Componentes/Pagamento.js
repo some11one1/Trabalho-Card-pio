@@ -14,11 +14,14 @@ import { WalletContext } from "../Context/WalletContext";
 import { supabase } from "../Supabase";
 import { AuthContext } from "../Context/AuthContext";
 import { useAnuncio } from "../Context/AnuncioContext";
+import { CarrinhoContext } from "../Context/CarrinhoContext";
 // FEITO POR IA, se inspire nela e re faça o código, essa tela será refeita, e essa tela é uma base para termos uma noção
 export default function Pagamento({ navigation, route }) {
   const { ColocarNoHistorico } = useHistorico();
-  const { chanceMostrarAnuncio} = useAnuncio()
-const { user } = useContext(AuthContext)
+  const { chanceMostrarAnuncio} = useAnuncio();
+  const { user } = useContext(AuthContext);
+  const { limparCarrinho } = useContext(CarrinhoContext);
+
   const { tema } = usarTheme();
   const { saldo, setSaldo, carregarSaldo} = useContext(WalletContext)
      useEffect(() => {
@@ -62,6 +65,7 @@ const valorCompra = totalGeral ?? produtoPreco;
       
       if (saldo < valorCompra) {
       alert('Saldo Insuficiente')
+      return;
       } else {
           const novoSaldo = saldo - valorCompra;
           setSaldo(novoSaldo);
@@ -81,6 +85,7 @@ const valorCompra = totalGeral ?? produtoPreco;
       carrinho.forEach((item) => {
         ColocarNoHistorico(item.id, item.nome, item.preco);
       });
+      limparCarrinho()
     } else {
       ColocarNoHistorico(produtoId, produtoNome, valorCompra);
     }

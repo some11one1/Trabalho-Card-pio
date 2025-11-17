@@ -39,31 +39,49 @@ export const CarrinhoProvider = ({ children }) => {
     if (!user) {
       return;
     }
-     const chave = `carrinho_${user.id || user.username}`;
+
+    
+    const precoNumerico = Number(
+      String(preco).replace("R$", "").replace(",", ".").trim()
+    );
+
+    // Se mesmo assim não virar número, evita quebrar tudo
+    if (isNaN(precoNumerico)) {
+      console.log("ERRO: preço inválido vindo da API:", preco);
+      return;
+    }
+
+    const chave = `carrinho_${user.id || user.username}`;
+
     try {
-      // Verifica se o produto já está no carrinho
+      
       const itemExistente = carrinho.find((item) => item.id === id);
 
       let novoCarrinho;
 
       if (itemExistente) {
-        // Se ja existe, atualiza a quantidade e o total
+        
         novoCarrinho = carrinho.map((item) =>
           item.id === id
             ? {
                 ...item,
                 quantidade: item.quantidade + 1,
-                total: (item.quantidade + 1) * item.preco,
+                total: (item.quantidade + 1) * Number(item.preco),
               }
             : item
         );
       } else {
-        // Se nao existe, adiciona o item com quantidade 1
-        const novoItem = { id, nome, preco, quantidade: 1, total: preco };
+        
+        const novoItem = {
+          id,
+          nome,
+          preco: precoNumerico,   
+          quantidade: 1,
+          total: precoNumerico,
+        };
         novoCarrinho = [...carrinho, novoItem];
       }
 
-      // Atualiza estado e salva no AsyncStorage
       setCarrinho(novoCarrinho);
       await AsyncStorage.setItem(chave, JSON.stringify(novoCarrinho));
     } catch (error) {

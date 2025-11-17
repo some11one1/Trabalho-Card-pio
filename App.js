@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // só ta importando todos os bagulhos necessários
 
@@ -44,6 +45,8 @@ export const UserTabs = () => {
 
   const tamanhoIcone = 20;
 
+  const insets = useSafeAreaInsets();
+
   const renderIcon =
     (name) =>
     ({ focused, color, size }) => {
@@ -56,7 +59,13 @@ export const UserTabs = () => {
       screenOptions={{
         headerStyle: { backgroundColor: tema.background },
         headerTintColor: tema.texto,
-        tabBarStyle: { backgroundColor: tema.background, height: 70 },
+        headerShown: false,
+        tabBarStyle: { backgroundColor: tema.background,
+          borderTopWidth: 0,
+          elevation: 0,
+          paddingBottom: insets.bottom + 6,
+          height: 60 + insets.bottom,
+        },
         tabBarActiveTintColor: tema.textoAtivo,
         tabBarInactiveTintColor: tema.texto,
 
@@ -107,6 +116,7 @@ export const AdminTabs = () => {
   const { isModoEscuro } = usarTheme();
   const temaAdaptativo = isModoEscuro ? "#121212" : "#EDEDED";
   const temaAdaptativoTexto = isModoEscuro ? "#EDEDED" : "#121212";
+  
 
   return (
     <Tab.Navigator

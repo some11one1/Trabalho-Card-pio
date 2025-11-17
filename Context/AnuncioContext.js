@@ -11,7 +11,7 @@ export function AnuncioProvider({ children }) {
     return new Promise((resolve) => {
       const chance = Math.random();
 
-      if (chance < 0.9) {
+      if (chance < 0) {
         resolverRef.current = resolve;
         setVisivel(true);
       } else {
