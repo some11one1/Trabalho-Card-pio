@@ -182,7 +182,6 @@ const valorCompra = totalGeral ?? produtoPreco;
         ))}
       </ScrollView>
 
-      {/* TOTAL E BOTÃO */}
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={[styles.totalLabel, { color: tema.texto }]}>TOTAL:</Text>
