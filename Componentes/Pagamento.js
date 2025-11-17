@@ -34,6 +34,7 @@ export default function Pagamento({ navigation, route }) {
     produtoNome = null,
     produtoPreco = null,
     produtoImg = null,
+    qndtd = null,
   } = route.params || {};
 
   // Determina se é compra direta ou via carrinho
@@ -45,6 +46,7 @@ export default function Pagamento({ navigation, route }) {
           nome: produtoNome,
           preco: produtoPreco,
           img: produtoImg,
+          quantidade: qndtd
         },
       ];
 
@@ -83,11 +85,11 @@ const valorCompra = totalGeral ?? produtoPreco;
     // LEMBRAR DE COLOCAR MAIS INFORMAÇÕES  E MELHORES COMO QUANTIDADE PRODUTOS COMPRADO DURANTE UMA COMPRAR, e alias, ele só está pegando 1 produto por vez
     if (carrinho) {
       carrinho.forEach((item) => {
-        ColocarNoHistorico(item.id, item.nome, item.preco);
+        ColocarNoHistorico(item.id, item.nome, item.preco, item.quantidade);
       });
       limparCarrinho()
     } else {
-      ColocarNoHistorico(produtoId, produtoNome, valorCompra);
+      ColocarNoHistorico(produtoId, produtoNome, valorCompra, qndtd);
     }
     alert(`Pagamento confirmado via ${metodo.nome}`);
     navigation.goBack()

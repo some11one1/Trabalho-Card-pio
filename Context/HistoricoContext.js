@@ -31,13 +31,13 @@ export function HistoricoProvider({ children }) {
     carregarHistorico();
   }, [user]);
 
-  async function ColocarNoHistorico(id, nome, preco ) {
+  async function ColocarNoHistorico(id, nome, preco, quantidade ) {
     if (!user) {
       return;
     }
     const chave = `carrinho_${user.id || user.username}`;
     try {
-      const novoItem = { id, nome, preco, data: new Date() };
+      const novoItem = { id, nome, preco, quantidade, data: new Date() };
       setHistorico((prevHistorico) => {
         const novoHistorico = [...prevHistorico, novoItem];
         AsyncStorage.setItem(chave, JSON.stringify(novoHistorico));
