@@ -37,7 +37,7 @@ export const CarrinhoProvider = ({ children }) => {
 
   async function AdicionarAoCarrinho(id, nome, preco) {
     if (!user) {
-      return;
+      return; 
     }
 
     

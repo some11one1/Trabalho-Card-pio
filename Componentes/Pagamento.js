@@ -8,25 +8,29 @@ import {
 } from "react-native";
 import { useHistorico } from "../Context/HistoricoContext";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/Entypo";
 import { usarTheme } from "../Context/ThemeContext";
 import { WalletContext } from "../Context/WalletContext";
 import { supabase } from "../Supabase";
 import { AuthContext } from "../Context/AuthContext";
 import { useAnuncio } from "../Context/AnuncioContext";
 import { CarrinhoContext } from "../Context/CarrinhoContext";
+
+// Icones que colocamos gustavo
+import Icon from "react-native-vector-icons/Entypo";
+import Icon2 from "react-native-vector-icons/MaterialIcons";
+
 // FEITO POR IA, se inspire nela e re faça o código, essa tela será refeita, e essa tela é uma base para termos uma noção
 export default function Pagamento({ navigation, route }) {
   const { ColocarNoHistorico } = useHistorico();
-  const { chanceMostrarAnuncio} = useAnuncio();
+  const { chanceMostrarAnuncio } = useAnuncio();
   const { user } = useContext(AuthContext);
   const { limparCarrinho } = useContext(CarrinhoContext);
 
   const { tema } = usarTheme();
-  const { saldo, setSaldo, carregarSaldo} = useContext(WalletContext)
-     useEffect(() => {
-      carregarSaldo();
-    }, []);
+  const { saldo, setSaldo, carregarSaldo } = useContext(WalletContext)
+  useEffect(() => {
+    carregarSaldo();
+  }, []);
   const {
     carrinho = null,
     totalGeral = null,
@@ -41,51 +45,51 @@ export default function Pagamento({ navigation, route }) {
   const itens = carrinho
     ? carrinho
     : [
-        {
-          id: produtoId,
-          nome: produtoNome,
-          preco: produtoPreco,
-          img: produtoImg,
-          quantidade: qndtd
-        },
-      ];
+      {
+        id: produtoId,
+        nome: produtoNome,
+        preco: produtoPreco,
+        img: produtoImg,
+        quantidade: qndtd
+      },
+    ];
 
   const total = totalGeral ? totalGeral : produtoPreco;
   const [metodo, setMetodo] = useState(null);
 
   const metodosPagamento = [
-    { id: "pix", nome: "Pix", icone: "dots-three-horizontal" },
+    { id: "pix", nome: "Pix", icone: "pix" },
     { id: "cartao", nome: "Cartão de Crédito", icone: "credit-card" },
     { id: "saldo", nome: "Saldo da Conta", icone: "wallet" },
   ];
-const valorCompra = totalGeral ?? produtoPreco;
+  const valorCompra = totalGeral ?? produtoPreco;
   const confirmarPagamento = async () => {
     if (!metodo) {
       alert("Selecione um método de pagamento");
       return;
     } else if (metodo.nome == "Saldo da Conta") {
-      
+
       if (saldo < valorCompra) {
-      alert('Saldo Insuficiente')
-      return;
+        alert('Saldo Insuficiente')
+        return;
       } else {
-          const novoSaldo = saldo - valorCompra;
-          setSaldo(novoSaldo);
-          const { error } = await supabase
+        const novoSaldo = saldo - valorCompra;
+        setSaldo(novoSaldo);
+        const { error } = await supabase
           .from("usuarios")
           .update({ saldo: novoSaldo })
           .eq("id", user.id);
-          if (error) {
-            alert("erro ao atualizar o saldo");
-            setSaldo(saldo);
-            return;
-          }
+        if (error) {
+          alert("erro ao atualizar o saldo");
+          setSaldo(saldo);
+          return;
         }
-    } 
+      }
+    }
     // LEMBRAR DE COLOCAR MAIS INFORMAÇÕES  E MELHORES COMO QUANTIDADE PRODUTOS COMPRADO DURANTE UMA COMPRAR, e alias, ele só está pegando 1 produto por vez
     if (carrinho) {
-      carrinho.forEach((item) => {
-        ColocarNoHistorico(item.id, item.nome, item.preco, item.quantidade);
+      carrinho.forEach(async (item) => {
+        await ColocarNoHistorico(item.id, item.nome, item.preco, item.quantidade);
       });
       limparCarrinho()
     } else {
@@ -103,7 +107,8 @@ const valorCompra = totalGeral ?? produtoPreco;
       <View style={styles.header}>
         <TouchableOpacity onPress={async () => {
           await chanceMostrarAnuncio();
-          navigation.goBack()}}>
+          navigation.goBack()
+        }}>
           <Icon name="chevron-left" size={32} color={tema.texto} />
         </TouchableOpacity>
 
@@ -141,7 +146,7 @@ const valorCompra = totalGeral ?? produtoPreco;
           </View>
         ))}
 
-  
+
         <Text
           style={[
             styles.metodosTitulo,
@@ -162,16 +167,24 @@ const valorCompra = totalGeral ?? produtoPreco;
                 borderColor: tema.textoAtivo,
               },
             ]}
-            onPress={async () =>{
+            onPress={async () => {
               await chanceMostrarAnuncio();
-              setMetodo(m)}}
+              setMetodo(m)
+            }}
           >
-            <Icon
-              name={m.icone}
-              size={22}
-              color={metodo?.id === m.id ? "#FFF" : tema.texto}
-              style={{ marginRight: 10 }}
-            />
+            {
+              m.id === 'pix' ? <Icon2
+                name={m.icone}
+                size={22}
+                color={metodo?.id === m.id ? "#FFF" : tema.texto}
+                style={{ marginRight: 10 }}
+              /> : <Icon
+                name={m.icone}
+                size={22}
+                color={metodo?.id === m.id ? "#FFF" : tema.texto}
+                style={{ marginRight: 10 }}
+              />
+            }
             <Text
               style={[
                 styles.metodoTexto,
@@ -192,9 +205,10 @@ const valorCompra = totalGeral ?? produtoPreco;
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.btnComprar} onPress={async() => {
-        await chanceMostrarAnuncio()
-          confirmarPagamento()}}>
+        <TouchableOpacity style={styles.btnComprar} onPress={async () => {
+          await chanceMostrarAnuncio()
+          confirmarPagamento()
+        }}>
           <Icon name="check" size={24} color="#FFF" />
           <Text style={styles.btnComprarTexto}>Confirmar Pagamento</Text>
         </TouchableOpacity>
