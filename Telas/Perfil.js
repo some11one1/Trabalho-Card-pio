@@ -1,4 +1,4 @@
-import { View, Text, Button, TextInput, Modal } from "react-native"; //  >>>>> não esquece de importar aqui se for colocar coisas tipo TouchableOpacity
+import { View, Text, Button, TextInput, Modal, TouchableOpacity } from "react-native"; //  >>>>> não esquece de importar aqui se for colocar coisas tipo TouchableOpacity
 import React, { useContext, useEffect, useState } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { WalletContext } from "../Context/WalletContext";
@@ -12,7 +12,8 @@ export default function Perfil() {
   const { chanceMostrarAnuncio} = useAnuncio()
   const [modalVisivel, setModalVisivel] = useState(false)
   const { saldo, setSaldo, carregarSaldo, saldoBanco, setSaldoBanco, carregarSaldoBanco} = useContext(WalletContext);
-  const { user } = useContext(AuthContext)
+  const { user } = useContext(AuthContext);
+
 
   const confirmarRecarga = async (valor) => {
     chanceMostrarAnuncio()
@@ -30,16 +31,19 @@ export default function Perfil() {
     setSaldo(saldo)
     setSaldoBanco(saldoBanco)
   }
-}else {
-   alert("ta sem dinheiro pobre")
-    console.log(saldoBanco)
-  }
+  }else {
+    alert("ta sem dinheiro pobre")
+      console.log(saldoBanco)
+    }
 }
   useEffect(() => {
     carregarSaldo();
     carregarSaldoBanco()
+  
   }, []);
   const { tema } = usarTheme();
+
+  
   return (
     <SafeAreaView
       style={{
@@ -51,13 +55,30 @@ export default function Perfil() {
       <Nav_Menu />
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <View>
-          <Text style={{ color: tema.texto }}>Perfil</Text>
-          <Text style={{ color: tema.texto }}>saldo: {saldo}</Text>
-          <Button
-            title="Recarregar"
-            onPress={() => setModalVisivel(!modalVisivel)}
-          />
+          <Text style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}>Olá, {user.username}</Text>
+          <Text style={{ color: tema.texto, fontSize: 25, }}>saldo: R$:{saldo}</Text>
+
+
         </View>
+
+        <TouchableOpacity
+          onPress={() => setModalVisivel(!modalVisivel)}
+          style={{
+            position: "absolute",
+            bottom: 30,
+            backgroundColor: tema.cardBackground,
+            paddingVertical: 12,
+            paddingHorizontal: 20,
+            borderWidth: 2,
+            borderRadius: 10,
+            borderColor: tema.textoAtivo,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={{ color: tema.texto, fontSize: 22 }}>Recarregar</Text>
+        </TouchableOpacity>
+
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
