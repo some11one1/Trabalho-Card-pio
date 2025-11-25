@@ -49,10 +49,10 @@ export const UserTabs = () => {
 
   const renderIcon =
     (name) =>
-    ({ focused, color, size }) => {
-      // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
-      return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
-    };
+      ({ focused, color, size }) => {
+        // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
+        return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
+      };
 
   return (
     <Tab.Navigator
@@ -60,7 +60,8 @@ export const UserTabs = () => {
         headerStyle: { backgroundColor: tema.background },
         headerTintColor: tema.texto,
         headerShown: false,
-        tabBarStyle: { backgroundColor: tema.background,
+        tabBarStyle: {
+          backgroundColor: tema.background,
           borderTopWidth: 0,
           elevation: 0,
           paddingBottom: insets.bottom + 6,
@@ -116,7 +117,16 @@ export const AdminTabs = () => {
   const { isModoEscuro } = usarTheme();
   const temaAdaptativo = isModoEscuro ? "#121212" : "#EDEDED";
   const temaAdaptativoTexto = isModoEscuro ? "#EDEDED" : "#121212";
-  
+
+  const tamanhoIcone = 20;
+
+  const renderIcon =
+    (name) =>
+      ({ focused, color, size }) => {
+        // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
+        return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
+      };
+
 
   return (
     <Tab.Navigator
@@ -133,10 +143,17 @@ export const AdminTabs = () => {
         component={AdminHome}
         options={{
           headerShown: false,
+          tabBarIcon: renderIcon("tasks")
         }}
       />
-      <Tab.Screen name="Configurar Usuários" component={ConfigUsuarios} />
-      <Tab.Screen name="Configurações" component={Configuracoes} />
+      <Tab.Screen name="Configurar Usuários" component={ConfigUsuarios} options={({ navigation }) => ({
+          headerShown: false,
+          tabBarIcon: renderIcon("users"),
+        })}/>
+      <Tab.Screen name="Configurações" component={Configuracoes} options={({ navigation }) => ({
+          headerShown: false,
+          tabBarIcon: renderIcon("cog"),
+        })}  />
     </Tab.Navigator>
   );
 };
@@ -202,7 +219,7 @@ const HomeDrawer = () => {
           headerShown: false,
         })}
       />
-      
+
 
       <Drawer.Screen
         name="sair"
