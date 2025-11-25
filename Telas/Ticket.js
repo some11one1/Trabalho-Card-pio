@@ -14,14 +14,15 @@ import { ProdutosContext } from "../Context/produtoContext";
 import Icon from "react-native-vector-icons/Entypo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Nav_Menu from "../Componentes/nav_menu";
-
+import { TicketContext } from "../Context/TicketContext";
 const screenWidth = Dimensions.get("window").width;
 const numColumns = 3;
 const margin = 8;
 
 const itemWidth = screenWidth / numColumns - margin * 2;
 
-export default function Home({ navigation, route }) {
+export default function Ticket({ navigation, route }) {
+  const { ticket } = useContext(TicketContext);
   const { chanceMostrarAnuncio } = useAnuncio();
   const { produtos, listarProdutos } = useContext(ProdutosContext);
   const { tema } = usarTheme();
@@ -57,7 +58,6 @@ export default function Home({ navigation, route }) {
         resizeMode="cover"
       />
 
-      {/* 2. Informações (Nome e Preço) */}
       <View style={styles.produtoInfo}>
         <Text
           numberOfLines={2}
@@ -65,13 +65,21 @@ export default function Home({ navigation, route }) {
         >
           {item.Nome}
         </Text>
-        <Text style={[styles.produtoValor, { color: tema.textoAtivo }]}>
-          R$ {item.Valor.toFixed(2).replace(".", ",")}
-        </Text>
+        {ticket ? (
+          <Text style={[styles.produtoValor, { color: tema.textoAtivo }]}>
+            Usar Ticket
+          </Text>
+        ) : (
+          <Text style={[styles.produtoValor, { color: tema.textoAtivo }]}>
+            Ticket indisponivel
+          </Text>
+        )}
       </View>
     </TouchableOpacity>
   );
-
+  const produtosFiltrados = produtos.filter(
+    (item) => item.categorias === "comida"
+  );
   return (
     <SafeAreaView
       style={[styles.containerPrincipal, { backgroundColor: tema.background }]}
@@ -79,7 +87,7 @@ export default function Home({ navigation, route }) {
       <Nav_Menu />
 
       <FlatList
-        data={produtos}
+        data={produtosFiltrados}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderProduto}
         contentContainerStyle={styles.listaContainer}

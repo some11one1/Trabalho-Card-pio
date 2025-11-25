@@ -3,9 +3,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-// só ta importando todos os bagulhos necessários
-
 import { AuthProvider, AuthContext } from "./Context/AuthContext";
 import { ThemeProvider, usarTheme } from "./Context/ThemeContext";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -20,7 +17,7 @@ import Carrinho from "./Telas/Carrinho";
 import Sobre from "./Telas/Sobre";
 import Configuracoes from "./Telas/Configuracoes";
 import { FontAwesome } from "@expo/vector-icons";
-
+import Ticket from "./Telas/Ticket";
 import { useContext } from "react";
 import { Alert, Platform } from "react-native";
 import { ProdutosProvider } from "./Context/produtoContext";
@@ -28,11 +25,12 @@ import { Button } from "react-native-web";
 import { WalletContext, WalletProvider } from "./Context/WalletContext";
 import CardProduto from "./Componentes/CardProduto";
 import Pagamento from "./Componentes/Pagamento";
-
+import { TicketProvider } from "./Context/TicketContext";
 import { SegredoProvider } from "./indexx";
 import { HistoricoProvider } from "./Context/HistoricoContext";
 import { CarrinhoProvider } from "./Context/CarrinhoContext";
 import { AnuncioProvider } from "./Context/AnuncioContext";
+
 // Tabs
 //cada Tab.Screen é uma aba, com nome e componente, componente é o que foi importando lá em cima, tem que ser mesmo nome, já o name tanto faz
 
@@ -60,7 +58,8 @@ export const UserTabs = () => {
         headerStyle: { backgroundColor: tema.background },
         headerTintColor: tema.texto,
         headerShown: false,
-        tabBarStyle: { backgroundColor: tema.background,
+        tabBarStyle: {
+          backgroundColor: tema.background,
           borderTopWidth: 0,
           elevation: 0,
           paddingBottom: insets.bottom + 6,
@@ -116,7 +115,6 @@ export const AdminTabs = () => {
   const { isModoEscuro } = usarTheme();
   const temaAdaptativo = isModoEscuro ? "#121212" : "#EDEDED";
   const temaAdaptativoTexto = isModoEscuro ? "#EDEDED" : "#121212";
-  
 
   return (
     <Tab.Navigator
@@ -189,6 +187,13 @@ const HomeDrawer = () => {
         })}
       />
       <Drawer.Screen
+        name="Ticket"
+        component={user?.role === "admin" ? null : Ticket}
+        options={() => ({
+          headerShown: false,
+        })}
+      />
+      <Drawer.Screen
         name="Perfil"
         component={Perfil}
         options={() => ({
@@ -202,7 +207,6 @@ const HomeDrawer = () => {
           headerShown: false,
         })}
       />
-      
 
       <Drawer.Screen
         name="sair"
@@ -247,17 +251,19 @@ export default function App() {
       <ThemeProvider>
         <AnuncioProvider>
           <AuthProvider>
-            <WalletProvider>
-              <ProdutosProvider>
-                <CarrinhoProvider>
-                  <HistoricoProvider>
-                    <NavigationContainer>
-                      <AppStack />
-                    </NavigationContainer>
-                  </HistoricoProvider>
-                </CarrinhoProvider>
-              </ProdutosProvider>
-            </WalletProvider>
+            <TicketProvider>
+              <WalletProvider>
+                <ProdutosProvider>
+                  <CarrinhoProvider>
+                    <HistoricoProvider>
+                      <NavigationContainer>
+                        <AppStack />
+                      </NavigationContainer>
+                    </HistoricoProvider>
+                  </CarrinhoProvider>
+                </ProdutosProvider>
+              </WalletProvider>
+            </TicketProvider>
           </AuthProvider>
         </AnuncioProvider>
       </ThemeProvider>

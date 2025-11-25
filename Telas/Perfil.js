@@ -1,49 +1,60 @@
-import { View, Text, Button, TextInput, Modal, TouchableOpacity } from "react-native"; //  >>>>> não esquece de importar aqui se for colocar coisas tipo TouchableOpacity
+import {
+  View,
+  Text,
+  Button,
+  TextInput,
+  Modal,
+  TouchableOpacity,
+} from "react-native"; //  >>>>> não esquece de importar aqui se for colocar coisas tipo TouchableOpacity
 import React, { useContext, useEffect, useState } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { WalletContext } from "../Context/WalletContext";
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../Supabase";
-import  Nav_Menu from '../Componentes/nav_menu';
+import Nav_Menu from "../Componentes/nav_menu";
 import { AuthContext } from "../Context/AuthContext";
 import { useAnuncio } from "../Context/AnuncioContext";
-
+import { TicketContext } from "../Context/TicketContext";
 export default function Perfil() {
-  const { chanceMostrarAnuncio} = useAnuncio()
-  const [modalVisivel, setModalVisivel] = useState(false)
-  const { saldo, setSaldo, carregarSaldo, saldoBanco, setSaldoBanco, carregarSaldoBanco} = useContext(WalletContext);
+  const { chanceMostrarAnuncio } = useAnuncio();
+  const [modalVisivel, setModalVisivel] = useState(false);
+  const {
+    saldo,
+    setSaldo,
+    carregarSaldo,
+    saldoBanco,
+    setSaldoBanco,
+    carregarSaldoBanco,
+  } = useContext(WalletContext);
   const { user } = useContext(AuthContext);
-
-
+  const { ticket } = useContext(TicketContext);
   const confirmarRecarga = async (valor) => {
-    chanceMostrarAnuncio()
+    chanceMostrarAnuncio();
     if (saldoBanco >= valor) {
-    const novoSaldo = saldo + valor
-    const novoSaldoBanco = saldoBanco - valor
-    setSaldo(novoSaldo)
-    setSaldoBanco(novoSaldoBanco)
-    const { error } = await supabase
-      .from("usuarios")
-      .update({ saldo: novoSaldo, saldoBanco: novoSaldoBanco })
-      .eq("id", user.id);
-   if (error) {
-    console.log("erro ao atualizar saldo");
-    setSaldo(saldo)
-    setSaldoBanco(saldoBanco)
-  }
-  }else {
-    alert("ta sem dinheiro pobre")
-      console.log(saldoBanco)
+      const novoSaldo = saldo + valor;
+      const novoSaldoBanco = saldoBanco - valor;
+      setSaldo(novoSaldo);
+      setSaldoBanco(novoSaldoBanco);
+      const { error } = await supabase
+        .from("usuarios")
+        .update({ saldo: novoSaldo, saldoBanco: novoSaldoBanco })
+        .eq("id", user.id);
+      if (error) {
+        console.log("erro ao atualizar saldo");
+        setSaldo(saldo);
+        setSaldoBanco(saldoBanco);
+      }
+    } else {
+      alert("ta sem dinheiro pobre");
+      console.log(saldoBanco);
     }
-}
+  };
   useEffect(() => {
     carregarSaldo();
-    carregarSaldoBanco()
-  
+    carregarSaldoBanco();
   }, []);
   const { tema } = usarTheme();
 
-  
   return (
     <SafeAreaView
       style={{
@@ -55,12 +66,22 @@ export default function Perfil() {
       <Nav_Menu />
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <View>
-          <Text style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}>Olá, {user.username}</Text>
-          <Text style={{ color: tema.texto, fontSize: 25, }}>saldo: R$:{saldo}</Text>
-
-
+          <Text style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}>
+            Olá, {user.username}
+          </Text>
+          <Text style={{ color: tema.texto, fontSize: 25 }}>
+            saldo: R$:{saldo}
+          </Text>
+          {ticket ? (
+            <Text style={{ color: tema.texto, fontSize: 25 }}>
+              Ticket Disponivel
+            </Text>
+          ) : (
+            <Text style={{ color: tema.texto, fontSize: 25 }}>
+              Ticket indisponivel
+            </Text>
+          )}
         </View>
-
         <TouchableOpacity
           onPress={() => setModalVisivel(!modalVisivel)}
           style={{
