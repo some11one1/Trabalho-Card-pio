@@ -47,10 +47,10 @@ export const UserTabs = () => {
 
   const renderIcon =
     (name) =>
-      ({ focused, color, size }) => {
-        // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
-        return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
-      };
+    ({ focused, color, size }) => {
+      // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
+      return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
+    };
 
   return (
     <Tab.Navigator
@@ -58,8 +58,6 @@ export const UserTabs = () => {
         headerStyle: { backgroundColor: tema.background },
         headerTintColor: tema.texto,
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: tema.background,
         tabBarStyle: {
           backgroundColor: tema.background,
           borderTopWidth: 0,
@@ -122,11 +120,10 @@ export const AdminTabs = () => {
 
   const renderIcon =
     (name) =>
-      ({ focused, color, size }) => {
-        // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
-        return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
-      };
-
+    ({ focused, color, size }) => {
+      // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
+      return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
+    };
 
   return (
     <Tab.Navigator
@@ -143,17 +140,25 @@ export const AdminTabs = () => {
         component={AdminHome}
         options={{
           headerShown: false,
-          tabBarIcon: renderIcon("tasks")
+          tabBarIcon: renderIcon("tasks"),
         }}
       />
-      <Tab.Screen name="Configurar Usuários" component={ConfigUsuarios} options={({ navigation }) => ({
+      <Tab.Screen
+        name="Configurar Usuários"
+        component={ConfigUsuarios}
+        options={({ navigation }) => ({
           headerShown: false,
           tabBarIcon: renderIcon("users"),
-        })}/>
-      <Tab.Screen name="Configurações" component={Configuracoes} options={({ navigation }) => ({
+        })}
+      />
+      <Tab.Screen
+        name="Configurações"
+        component={Configuracoes}
+        options={({ navigation }) => ({
           headerShown: false,
           tabBarIcon: renderIcon("cog"),
-        })}  />
+        })}
+      />
     </Tab.Navigator>
   );
 };
