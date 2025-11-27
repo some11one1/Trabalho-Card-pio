@@ -119,10 +119,7 @@ export default function Ticket({ navigation, route }) {
               <Button
                 title="sim"
                 onPress={() => {
-                  ColocarNoHistorico({
-                    produtoNome: produtoSelect.Nome,
-                    produtoId: produtoSelect.id,
-                  });
+                  ColocarNoHistorico(produtoSelect.id, produtoSelect.Nome);
                   setModalVisivel(false);
                 }}
               />
