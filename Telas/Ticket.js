@@ -5,16 +5,19 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
+  Modal,
   Dimensions,
+  Button,
 } from "react-native";
 import { useAnuncio } from "../Context/AnuncioContext";
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { ProdutosContext } from "../Context/produtoContext";
 import Icon from "react-native-vector-icons/Entypo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Nav_Menu from "../Componentes/nav_menu";
 import { TicketContext } from "../Context/TicketContext";
+import { useHistorico } from "../Context/HistoricoContext";
 const screenWidth = Dimensions.get("window").width;
 const numColumns = 3;
 const margin = 8;
@@ -22,6 +25,9 @@ const margin = 8;
 const itemWidth = screenWidth / numColumns - margin * 2;
 
 export default function Ticket({ navigation, route }) {
+  const [produtoSelect, setProdutoSelect] = useState(null);
+  const { ColocarNoHistorico } = useHistorico();
+  const [modalVisivel, setModalVisivel] = useState(false);
   const { ticket } = useContext(TicketContext);
   const { chanceMostrarAnuncio } = useAnuncio();
   const { produtos, listarProdutos } = useContext(ProdutosContext);
@@ -42,14 +48,9 @@ export default function Ticket({ navigation, route }) {
           borderColor: tema.borda,
         },
       ]}
-      onPress={async () => {
-        await chanceMostrarAnuncio();
-        navigation.navigate("CardProduto", {
-          produtoId: item.id,
-          produtoPreco: item.Valor,
-          produtoNome: item.Nome,
-          produtoImg: item.img,
-        });
+      onPress={() => {
+        setProdutoSelect(item);
+        setModalVisivel(!modalVisivel);
       }}
     >
       <Image
@@ -85,7 +86,55 @@ export default function Ticket({ navigation, route }) {
       style={[styles.containerPrincipal, { backgroundColor: tema.background }]}
     >
       <Nav_Menu />
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={modalVisivel}
+        onRequestClose={() => setModalVisivel(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              width: 250,
+              backgroundColor: "white",
+              borderRadius: 15,
+              padding: 20,
+              alignItems: "center",
+              justifyContent: "center",
+              elevation: 5,
+            }}
+          >
+            <Text style={{ fontSize: 18, marginBottom: 10 }}>
+              Usar Seu ticket?
+            </Text>
 
+            <View style={{ marginTop: 15 }}>
+              <Button
+                title="sim"
+                onPress={() => {
+                  ColocarNoHistorico({
+                    produtoNome: produtoSelect.Nome,
+                    produtoId: produtoSelect.id,
+                  });
+                  setModalVisivel(false);
+                }}
+              />
+              <Button
+                title="não"
+                color="red"
+                onPress={() => setModalVisivel(false)}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
       <FlatList
         data={produtosFiltrados}
         keyExtractor={(item) => item.id.toString()}

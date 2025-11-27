@@ -27,7 +27,7 @@ export default function Pagamento({ navigation, route }) {
   const { limparCarrinho } = useContext(CarrinhoContext);
 
   const { tema } = usarTheme();
-  const { saldo, setSaldo, carregarSaldo } = useContext(WalletContext)
+  const { saldo, setSaldo, carregarSaldo } = useContext(WalletContext);
   useEffect(() => {
     carregarSaldo();
   }, []);
@@ -45,14 +45,14 @@ export default function Pagamento({ navigation, route }) {
   const itens = carrinho
     ? carrinho
     : [
-      {
-        id: produtoId,
-        nome: produtoNome,
-        preco: produtoPreco,
-        img: produtoImg,
-        quantidade: qndtd
-      },
-    ];
+        {
+          id: produtoId,
+          nome: produtoNome,
+          preco: produtoPreco,
+          img: produtoImg,
+          quantidade: qndtd,
+        },
+      ];
 
   const total = totalGeral ? totalGeral : produtoPreco;
   const [metodo, setMetodo] = useState(null);
@@ -68,9 +68,8 @@ export default function Pagamento({ navigation, route }) {
       alert("Selecione um método de pagamento");
       return;
     } else if (metodo.nome == "Saldo da Conta") {
-
       if (saldo < valorCompra) {
-        alert('Saldo Insuficiente')
+        alert("Saldo Insuficiente");
         return;
       } else {
         const novoSaldo = saldo - valorCompra;
@@ -86,29 +85,35 @@ export default function Pagamento({ navigation, route }) {
         }
       }
     }
-    // LEMBRAR DE COLOCAR MAIS INFORMAÇÕES  E MELHORES COMO QUANTIDADE PRODUTOS COMPRADO DURANTE UMA COMPRAR, e alias, ele só está pegando 1 produto por vez
+
     if (carrinho) {
       carrinho.forEach(async (item) => {
-        await ColocarNoHistorico(item.id, item.nome, item.preco, item.quantidade);
+        await ColocarNoHistorico(
+          item.id,
+          item.nome,
+          item.preco,
+          item.quantidade
+        );
       });
-      limparCarrinho()
+      limparCarrinho();
     } else {
       ColocarNoHistorico(produtoId, produtoNome, valorCompra, qndtd);
     }
     alert(`Pagamento confirmado via ${metodo.nome}`);
-    navigation.goBack()
+    navigation.goBack();
   };
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: tema.background }]}
     >
-
       <View style={styles.header}>
-        <TouchableOpacity onPress={async () => {
-          await chanceMostrarAnuncio();
-          navigation.goBack()
-        }}>
+        <TouchableOpacity
+          onPress={async () => {
+            await chanceMostrarAnuncio();
+            navigation.goBack();
+          }}
+        >
           <Icon name="chevron-left" size={32} color={tema.texto} />
         </TouchableOpacity>
 
@@ -117,7 +122,6 @@ export default function Pagamento({ navigation, route }) {
         <View style={{ width: 32 }} />
       </View>
 
-
       <ScrollView
         style={{ width: "100%" }}
         contentContainerStyle={{ padding: 20 }}
@@ -125,17 +129,19 @@ export default function Pagamento({ navigation, route }) {
         {itens.map((item, i) => (
           <View
             key={i}
-            style={[
-              styles.cardItem,
-              { backgroundColor: tema.card },
-            ]}
+            style={[styles.cardItem, { backgroundColor: tema.card }]}
           >
             <Text style={[styles.itemNome, { color: tema.texto }]}>
               {item.nome}
             </Text>
 
             {item.quantidade && item.quantidade > 1 && (
-              <Text style={[styles.itemQtd, { color: tema.textoSecundario || "#aaa" }]}>
+              <Text
+                style={[
+                  styles.itemQtd,
+                  { color: tema.textoSecundario || "#aaa" },
+                ]}
+              >
                 Quantidade: {item.quantidade}
               </Text>
             )}
@@ -146,12 +152,8 @@ export default function Pagamento({ navigation, route }) {
           </View>
         ))}
 
-
         <Text
-          style={[
-            styles.metodosTitulo,
-            { color: tema.texto, marginTop: 10 },
-          ]}
+          style={[styles.metodosTitulo, { color: tema.texto, marginTop: 10 }]}
         >
           Método de pagamento:
         </Text>
@@ -169,22 +171,24 @@ export default function Pagamento({ navigation, route }) {
             ]}
             onPress={async () => {
               await chanceMostrarAnuncio();
-              setMetodo(m)
+              setMetodo(m);
             }}
           >
-            {
-              m.id === 'pix' ? <Icon2
-                name={m.icone}
-                size={22}
-                color={metodo?.id === m.id ? "#FFF" : tema.texto}
-                style={{ marginRight: 10 }}
-              /> : <Icon
+            {m.id === "pix" ? (
+              <Icon2
                 name={m.icone}
                 size={22}
                 color={metodo?.id === m.id ? "#FFF" : tema.texto}
                 style={{ marginRight: 10 }}
               />
-            }
+            ) : (
+              <Icon
+                name={m.icone}
+                size={22}
+                color={metodo?.id === m.id ? "#FFF" : tema.texto}
+                style={{ marginRight: 10 }}
+              />
+            )}
             <Text
               style={[
                 styles.metodoTexto,
@@ -205,10 +209,13 @@ export default function Pagamento({ navigation, route }) {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.btnComprar} onPress={async () => {
-          await chanceMostrarAnuncio()
-          confirmarPagamento()
-        }}>
+        <TouchableOpacity
+          style={styles.btnComprar}
+          onPress={async () => {
+            await chanceMostrarAnuncio();
+            confirmarPagamento();
+          }}
+        >
           <Icon name="check" size={24} color="#FFF" />
           <Text style={styles.btnComprarTexto}>Confirmar Pagamento</Text>
         </TouchableOpacity>
