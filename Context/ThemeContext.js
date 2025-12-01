@@ -28,6 +28,7 @@ export const ThemeProvider = ({ children }) => {
     return {
       background: isModoEscuro ? "#121212" : "#EDEDED",
       texto: isModoEscuro ? "#EDEDED" : "#121212",
+      textoReverse: isModoEscuro ? "#FFFFFF" : "#EDEDED",
       textoAtivo: isModoEscuro ? "#869cfcff" : "#314096ff",
       cardBackground: isModoEscuro ? "#000000" : "#FFFFFF",
       borda: isModoEscuro ? "#ccc4" : "#080808",

@@ -1,17 +1,13 @@
 import {
   View,
   Text,
-  Button,
-  TextInput,
   Modal,
   Image,
   Platform,
   TouchableOpacity,
 } from "react-native";
 import * as FileSystem from "expo-file-system";
-
 import * as ImagePicker from "expo-image-picker";
-import { fotoManager } from "../Componentes/carregarFoto";
 import React, { useContext, useEffect, useState } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { WalletContext } from "../Context/WalletContext";
@@ -21,9 +17,11 @@ import Nav_Menu from "../Componentes/nav_menu";
 import { AuthContext } from "../Context/AuthContext";
 import { useAnuncio } from "../Context/AnuncioContext";
 import { useTicket } from "../Context/TicketContext";
+
 export default function Perfil() {
   const { chanceMostrarAnuncio } = useAnuncio();
   const [modalVisivel, setModalVisivel] = useState(false);
+
   const {
     saldo,
     setSaldo,
@@ -32,22 +30,26 @@ export default function Perfil() {
     setSaldoBanco,
     carregarSaldoBanco,
   } = useContext(WalletContext);
+
   const { user, atualizarUsuario } = useContext(AuthContext);
+  const { tema, isModoEscuro } = usarTheme();
+  const { ticket } = useTicket();
+
+  // --- CORES TEMÁTICAS ---
+  const corRecarregar = isModoEscuro ? "#FFFFFF" : tema.textoAtivo;
+  const corFechar = isModoEscuro ? "#FFFFFF" : tema.perigo;
+
   const upload = async (fileBlob) => {
     const nome = `foto_${user.id}.jpg`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("avatars")
       .upload(nome, fileBlob, {
         upsert: true,
         contentType: "image/jpeg",
-        cacheControl: "0",
       });
 
-    if (error) {
-      console.log("Erro no upload:", error);
-      return;
-    }
+    if (error) return;
 
     const { data: urlData } = supabase.storage
       .from("avatars")
@@ -55,99 +57,68 @@ export default function Perfil() {
 
     let url = urlData.publicUrl + `?nocache=${Date.now()}`;
 
-    console.log("URL FOTO:", url);
-
-    // salva no banco
     await supabase.from("usuarios").update({ foto_url: url }).eq("id", user.id);
     atualizarUsuario({ foto_url: url });
   };
-  const trocarFoto = async () => {
-    try {
-      if (Platform.OS !== "web") {
-        const { status } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          alert("Permissão negada para acessar as fotos.");
-          return;
-        }
 
-        const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          allowsEditing: true,
-          quality: 1,
-        });
-
-        console.log("RESULTADO PICKER:", result);
-
-        if (result.canceled) return;
-
-        const uri = result.assets[0].uri;
-
-        // CORREÇÃO ANDROID — não usar fetch
-        const file = await uriParaBlob(uri);
-
-        await upload(file);
-      } else {
-        // Web
-        return new Promise((resolve) => {
-          const input = document.createElement("input");
-          input.type = "file";
-          input.accept = "image/*";
-
-          input.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            await upload(file);
-            resolve();
-          };
-
-          input.click();
-        });
-      }
-    } catch (error) {
-      console.log("Erro ao trocar foto:", error);
-    }
+  const uriParaBlob = async (uri) => {
+    const file = await FileSystem.readAsStringAsync(uri, { encoding: "base64" });
+    return Buffer.from(file, "base64");
   };
 
-  const { ticket } = useTicket();
+  const trocarFoto = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (result.canceled) return;
+
+      const file = await uriParaBlob(result.assets[0].uri);
+      await upload(file);
+    } catch (error) {}
+  };
+
   const confirmarRecarga = async (valor) => {
     chanceMostrarAnuncio();
     if (saldoBanco >= valor) {
       const novoSaldo = saldo + valor;
       const novoSaldoBanco = saldoBanco - valor;
+
       setSaldo(novoSaldo);
       setSaldoBanco(novoSaldoBanco);
+
       const { error } = await supabase
         .from("usuarios")
         .update({ saldo: novoSaldo, saldoBanco: novoSaldoBanco })
         .eq("id", user.id);
+
       if (error) {
-        console.log("erro ao atualizar saldo");
         setSaldo(saldo);
         setSaldoBanco(saldoBanco);
       }
     } else {
-      alert("ta sem dinheiro pobre");
-      console.log(saldoBanco);
+      alert("Saldo insuficiente.");
     }
   };
+
   useEffect(() => {
     carregarSaldo();
     carregarSaldoBanco();
   }, []);
-  const { tema } = usarTheme();
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        alignItems: "center",
-        backgroundColor: tema.background,
-      }}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: tema.background }}>
+      
+      {/* -------------- CABEÇALHO FIXO -------------- */}
       <Nav_Menu />
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+
+      {/* -------------- CONTEÚDO NO TOPO -------------- */}
+      <View style={{ flex: 1, padding: 20, justifyContent: "flex-start" }}>
+        
+        {/* FOTO E INFORMAÇÕES */}
         <View
           style={{
             flexDirection: "row",
@@ -166,111 +137,118 @@ export default function Perfil() {
                 borderRadius: 60,
                 borderWidth: 2,
                 borderColor: tema.textoAtivo,
-                marginRight: 20, // espaço entre a imagem e o texto
+                marginRight: 20,
               }}
             />
           </TouchableOpacity>
 
           <View>
-            <Text
-              style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}
-            >
+            <Text style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}>
               Olá, {user.username}
             </Text>
             <Text style={{ color: tema.texto, fontSize: 25 }}>
-              saldo: R$:{saldo}
+              Saldo: R$ {saldo}
             </Text>
-            {ticket ? (
-              <Text style={{ color: tema.texto, fontSize: 25 }}>
-                Ticket Disponivel
-              </Text>
-            ) : (
-              <Text style={{ color: tema.texto, fontSize: 25 }}>
-                Ticket indisponivel
-              </Text>
-            )}
+            <Text style={{ color: tema.texto, fontSize: 25 }}>
+              {ticket ? "Ticket disponível" : "Ticket indisponível"}
+            </Text>
           </View>
         </View>
 
-        <TouchableOpacity
-          onPress={() => setModalVisivel(!modalVisivel)}
+      </View>
+
+      {/* -------------- BOTÃO RECARREGAR FIXO EMBAIXO -------------- */}
+      <TouchableOpacity
+        onPress={() => setModalVisivel(true)}
+        style={{
+          position: "absolute",
+          bottom: 30,
+          alignSelf: "center",
+          backgroundColor: tema.cardBackground,
+          paddingVertical: 12,
+          paddingHorizontal: 20,
+          borderWidth: 2,
+          borderRadius: 10,
+          borderColor: corRecarregar,
+        }}
+      >
+        <Text
+          style={{ fontSize: 22, fontWeight: "600", color: corRecarregar }}
+        >
+          Recarregar
+        </Text>
+      </TouchableOpacity>
+
+      {/* -------------- MODAL -------------- */}
+      <Modal
+        transparent
+        animationType="fade"
+        visible={modalVisivel}
+        onRequestClose={() => setModalVisivel(false)}
+      >
+        <View
           style={{
-            position: "absolute",
-            bottom: 30,
-            backgroundColor: tema.cardBackground,
-            paddingVertical: 12,
-            paddingHorizontal: 20,
-            borderWidth: 2,
-            borderRadius: 10,
-            borderColor: tema.textoAtivo,
-            alignItems: "center",
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
             justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <Text style={{ color: tema.texto, fontSize: 22 }}>Recarregar</Text>
-        </TouchableOpacity>
-
-        <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-        >
-          <Modal
-            transparent={true}
-            animationType="fade"
-            visible={modalVisivel}
-            onRequestClose={() => setModalVisivel(false)}
+          <View
+            style={{
+              width: 260,
+              backgroundColor: tema.cardBackground,
+              borderRadius: 15,
+              padding: 20,
+              alignItems: "center",
+              borderColor: tema.textoAtivo,
+              borderWidth: 2,
+            }}
           >
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: "rgba(0,0,0,0.5)",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <View
-                style={{
-                  width: 250,
-                  backgroundColor: "white",
-                  borderRadius: 15,
-                  padding: 20,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  elevation: 5,
-                }}
-              >
-                <Text style={{ fontSize: 18, marginBottom: 10 }}>
-                  Recarregar Saldo
-                </Text>
+            <Text style={{ color: tema.texto, fontSize: 20, marginBottom: 10 }}>
+              Recarregar saldo
+            </Text>
 
-                <View
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+              {["10", "25", "50", "100"].map((v) => (
+                <TouchableOpacity
+                  key={v}
                   style={{
-                    flexDirection: "row",
-                    flexWrap: "wrap",
-                    justifyContent: "center",
+                    borderWidth: 1,
+                    borderColor: tema.texto,
+                    padding: 8,
+                    borderRadius: 7,
+                    margin: 4,
                   }}
+                  onPress={() => confirmarRecarga(Number(v))}
                 >
-                  {["10", "25", "50", "100"].map((v) => (
-                    <View key={v} style={{ margin: 5 }}>
-                      <Button
-                        title={`R$${v}`}
-                        onPress={() => confirmarRecarga(Number(v))} //converte em numero
-                      />
-                    </View>
-                  ))}
-                </View>
-
-                <View style={{ marginTop: 15 }}>
-                  <Button
-                    title="Fechar"
-                    color="red"
-                    onPress={() => setModalVisivel(false)}
-                  />
-                </View>
-              </View>
+                  <Text style={{ color: tema.texto, fontSize: 18 }}>
+                    R${v}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
-          </Modal>
+
+            {/* BOTÃO FECHAR */}
+            <TouchableOpacity
+              style={{
+                marginTop: 15,
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                borderRadius: 10,
+                borderColor: corFechar,
+                borderWidth: 2,
+              }}
+              onPress={() => setModalVisivel(false)}
+            >
+              <Text style={{ fontSize: 18, color: corFechar }}>
+                Fechar
+              </Text>
+            </TouchableOpacity>
+
+          </View>
         </View>
-      </View>
+      </Modal>
     </SafeAreaView>
   );
 }
