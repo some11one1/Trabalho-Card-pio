@@ -1,104 +1,157 @@
-import { View, Text, Button, TextInput, StyleSheet, FlatList } from "react-native"; //  >>>>> não esquece de importar aqui se for colocar coisas tipo TouchableOpacity
-import React, { useContext, useEffect } from "react";
-import { usarTheme, tema} from "../Context/ThemeContext";
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
+import { usarTheme } from "../Context/ThemeContext";
 import { AuthContext } from "../Context/AuthContext";
 
-
 export default function ConfigUsuarios() {
-  const { CriarUsuario, DeletarUsuario, ListarUsuarios,  usuarios, setUsuarios } = useContext(AuthContext);
-  const { tema } = usarTheme();
-  const [ username, setUsername ] = React.useState("");
-  const [ senha, setSenha ] = React.useState("");
-  const [ is_admin, setIs_Admin ] = React.useState(false);
+  const { CriarUsuario, DeletarUsuario, ListarUsuarios, usuarios } = useContext(AuthContext);
+  const { tema, isModoEscuro } = usarTheme();
+
+  const [username, setUsername] = useState("");
+  const [senha, setSenha] = useState("");
+  const [is_admin, setIs_Admin] = useState(false);
 
   useEffect(() => {
     ListarUsuarios();
   }, []);
 
-
   const handleCriarUsuario = async () => {
     if (!username || !senha) {
       alert("Um dos campos está vazio.");
       return;
-    } 
-    const sucesso = await CriarUsuario(username, senha, is_admin); // chama a função de criar usuario do AuthContext
-    if (!sucesso) { // se der errado
-      alert("Erro ao criar usuário");
-      return; // se der errado, sai da função e nao continua o resto dela
     }
-    ListarUsuarios(); // atualiza a lista de usuarios depois de criar um novo
-  }
-  return ( 
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: tema.background,
-        flexDirection: "row",
-        gap: 100
-      }}
-    >
-      <View>
-        <Text style={{ color: tema.texto }}>Criar Users</Text>
+    const sucesso = await CriarUsuario(username, senha, is_admin);
+    if (!sucesso) {
+      alert("Erro ao criar usuário");
+      return;
+    }
+    ListarUsuarios();
+    setUsername("");
+    setSenha("");
+    setIs_Admin(false);
+  };
+
+  
+  const corDeletar = isModoEscuro ? "#FFFFFF" : tema.perigo;
+
+  return (
+    <View style={[styles.container, { backgroundColor: tema.background }]}>
+      
+      {/* ---------- Criar usuário ---------- */}
+      <View style={styles.criarContainer}>
+        <Text style={[styles.title, { color: tema.texto }]}>Criar Usuário</Text>
+        
         <TextInput
-          style={{
-            borderWidth: 1,
-            borderColor: tema.texto,
-            width: 150,
-            height: 25,
-            color: tema.texto,
-          }}
-          placeholder="Usuario"
+          style={[styles.input, { borderColor: tema.texto, color: tema.texto }]}
+          placeholder="Usuário"
+          placeholderTextColor={tema.texto + "99"}
           value={username}
           onChangeText={setUsername}
         />
+        
         <TextInput
-          style={{
-            borderWidth: 1,
-            borderColor: tema.texto,
-            width: 150,
-            height: 25,
-            color: tema.texto,
-          }}
+          style={[styles.input, { borderColor: tema.texto, color: tema.texto }]}
           placeholder="Senha"
+          placeholderTextColor={tema.texto + "99"}
           value={senha}
           onChangeText={setSenha}
-        />
-        <Button
-          title={is_admin ? "é admin" : "não é admin"}
-          onPress={() => {
-            setIs_Admin(!is_admin);
-            console.log("is_admin agora:", !is_admin);
-          }}
+          secureTextEntry
         />
 
-        <Button title="Criar Usuario" onPress={handleCriarUsuario} />
+        <TouchableOpacity
+          style={[styles.toggleButton, { borderColor: tema.texto }]}
+          onPress={() => setIs_Admin(!is_admin)}
+        >
+          <Text style={{ color: tema.texto }}>{is_admin ? "É admin" : "Não é admin"}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.criarButton, { backgroundColor: tema.textoAtivo }]}
+          onPress={handleCriarUsuario}
+        >
+          <Text style={{ color: tema.textoReverse, fontWeight: "bold" }}>Criar Usuário</Text>
+        </TouchableOpacity>
       </View>
 
-      <View>
-        <Text style={{ color: tema.texto }}>Lista de usuarios</Text>
+      {/* ---------- Lista de usuários ---------- */}
+      <View style={styles.listaContainer}>
+        <Text style={[styles.title, { color: tema.texto }]}>Lista de Usuários</Text>
+
         <FlatList
-        data={usuarios}
-        keyExtractor={(item) => item.id.toString()} // converte o id pra string pq as chaves tem que ser strings
-        renderItem={({ item }) => ( // pra cada item da lista, renderiza isso aqui
-          <View
-            style={{
-              flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: 250,}}>
-                
-            <Text style={{ color: tema.texto }}>{item.username} - {item.is_admin ? "Admin" : "User"}</Text> 
-            <Button
-              title="Deletar"
-              // executa a função de deletar usuario passando o id do usuario atual, tá la no AuthContext.js
-              onPress={() => DeletarUsuario(item.id)} /> 
-          </View>
-        )}
+          data={usuarios}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={[styles.usuarioItem, { borderColor: tema.textoAtivo }]}>
+              <Text style={{ color: tema.texto }}>
+                {item.username} - {item.is_admin ? "Admin" : "User"}
+              </Text>
+              <TouchableOpacity
+                style={[styles.deletarButton, { borderColor: corDeletar }]}
+                onPress={() => DeletarUsuario(item.id)}
+              >
+                <Text style={{ color: corDeletar }}>Deletar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         />
       </View>
     </View>
   );
-
 }
-const styles = StyleSheet.create({
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "column",
+    padding: 20,
+    justifyContent: "space-between",
+  },
+  criarContainer: {
+    flex: 1,
+    gap: 10,
+  },
+  listaContainer: {
+    flex: 1,
+    gap: 10,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    marginBottom: 10,
+  },
+  toggleButton: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  criarButton: {
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  usuarioItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 5,
+  },
+  deletarButton: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
 });
