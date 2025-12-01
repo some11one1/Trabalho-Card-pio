@@ -162,7 +162,7 @@ export default function Perfil() {
         onPress={() => setModalVisivel(true)}
         style={{
           position: "absolute",
-          bottom: 30,
+          bottom: 60,
           alignSelf: "center",
           backgroundColor: tema.cardBackground,
           paddingVertical: 12,

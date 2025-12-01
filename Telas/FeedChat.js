@@ -6,8 +6,11 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  KeyboardAvoidingView,
+  Platform
 } from "react-native";
 import { useChat } from "../Context/ChatContext";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { usarTheme } from "../Context/ThemeContext";
 import { AuthContext } from "../Context/AuthContext";
 
@@ -23,7 +26,14 @@ export default function Chat() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: tema.background }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1,
+        backgroundColor: tema.background,
+       }}
+      behavior={Platform.OS === "ios" ? "padding" : "padding"}
+      keyboardVerticalOffset={40}
+    >
+      <SafeAreaView style={{ flex: 1, backgroundColor: tema.background,  }}>
       <FlatList
         ref={flatListRef}
         data={mensagens}
@@ -90,6 +100,7 @@ export default function Chat() {
           <Text style={{ color: "#fff" }}>Enviar</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
