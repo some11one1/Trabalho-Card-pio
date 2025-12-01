@@ -1,10 +1,11 @@
-import React, { useContext } from "react";
+import React, { useContext, useRef } from "react";
 import {
   View,
   Text,
   TextInput,
   FlatList,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { useChat } from "../Context/ChatContext";
 import { usarTheme } from "../Context/ThemeContext";
@@ -15,6 +16,8 @@ export default function Chat() {
   const { tema } = usarTheme();
   const { user, carregando } = useContext(AuthContext);
 
+  const flatListRef = useRef(null);
+
   if (carregando) {
     return <Text>Carregando...</Text>;
   }
@@ -22,19 +25,43 @@ export default function Chat() {
   return (
     <View style={{ flex: 1, backgroundColor: tema.background }}>
       <FlatList
+        ref={flatListRef}
         data={mensagens}
         keyExtractor={(item) => item.id?.toString()}
         renderItem={({ item }) => (
-          <View style={{ padding: 10 }}>
-            <Text style={{ color: tema.texto, fontWeight: "bold" }}>
-              {item.usuario?.username ?? "Usuário"}
-              {item.usuario?.is_admin === true && (
-                <Text style={{ color: "gold" }}>     [Admin]</Text>
-              )}
-            </Text>
-            <Text style={{ color: tema.texto }}>{item.conteudo}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              padding: 10,
+              alignItems: "flex-start",
+            }}
+          >
+            <Image
+              source={{
+                uri:
+                  item.usuario?.foto_url || "https://i.imgur.com/3I6eQpA.png",
+              }}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                marginRight: 10,
+              }}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: tema.texto, fontWeight: "bold" }}>
+                {item.usuario?.username ?? "Usuário"}
+                {item.usuario?.is_admin === true && (
+                  <Text style={{ color: "gold" }}> [Admin]</Text>
+                )}
+              </Text>
+              <Text style={{ color: tema.texto }}>{item.conteudo}</Text>
+            </View>
           </View>
         )}
+        onContentSizeChange={() =>
+          flatListRef.current?.scrollToEnd({ animated: true })
+        }
       />
 
       <View style={{ flexDirection: "row", padding: 10 }}>
@@ -51,7 +78,6 @@ export default function Chat() {
             borderRadius: 8,
           }}
         />
-
         <TouchableOpacity
           onPress={enviarMensagem}
           style={{

@@ -7,7 +7,10 @@ import {
   Image,
   Platform,
   TouchableOpacity,
-} from "react-native"; 
+} from "react-native";
+import * as FileSystem from "expo-file-system";
+
+import * as ImagePicker from "expo-image-picker";
 import { fotoManager } from "../Componentes/carregarFoto";
 import React, { useContext, useEffect, useState } from "react";
 import { usarTheme } from "../Context/ThemeContext";
@@ -38,6 +41,7 @@ export default function Perfil() {
       .upload(nome, fileBlob, {
         upsert: true,
         contentType: "image/jpeg",
+        cacheControl: "0",
       });
 
     if (error) {
@@ -45,61 +49,68 @@ export default function Perfil() {
       return;
     }
 
-  const { data: urlData } = supabase.storage
-    .from("avatars")
-    .getPublicUrl(nome);
-    
-  let url = urlData.publicUrl + `?t=${Date.now()}`;
+    const { data: urlData } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(nome);
+
+    let url = urlData.publicUrl + `?nocache=${Date.now()}`;
 
     console.log("URL FOTO:", url);
 
     // salva no banco
-   await supabase.from("usuarios").update({ foto_url: url }).eq("id", user.id);
-   atualizarUsuario({ foto_url: url });
+    await supabase.from("usuarios").update({ foto_url: url }).eq("id", user.id);
+    atualizarUsuario({ foto_url: url });
   };
-const trocarFoto = async () => {
-  let file;
+  const trocarFoto = async () => {
+    try {
+      if (Platform.OS !== "web") {
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          alert("Permissão negada para acessar as fotos.");
+          return;
+        }
 
-  // celular
-  if (Platform.OS !== "web") {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-    });
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          quality: 1,
+        });
 
-    if (result.canceled) return;
+        console.log("RESULTADO PICKER:", result);
 
-    const uri = result.assets[0].uri;
-    const fetchImg = await fetch(uri);
-    file = await fetchImg.blob(); 
-  }
+        if (result.canceled) return;
 
-  // pc
-  else {
-    return new Promise((resolve) => {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "image/*";
+        const uri = result.assets[0].uri;
 
-      input.onchange = async (e) => {
-        const arquivo = e.target.files[0];
-        if (!arquivo) return;
-
-        file = arquivo;
+        // CORREÇÃO ANDROID — não usar fetch
+        const file = await uriParaBlob(uri);
 
         await upload(file);
-        resolve();
-      };
+      } else {
+        // Web
+        return new Promise((resolve) => {
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = "image/*";
 
-      input.click();
-    });
-  }
+          input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-  if (Platform.OS !== "web") {
-    await upload(file);
-  }
-};
-const { ticket } = useTicket();
+            await upload(file);
+            resolve();
+          };
+
+          input.click();
+        });
+      }
+    } catch (error) {
+      console.log("Erro ao trocar foto:", error);
+    }
+  };
+
+  const { ticket } = useTicket();
   const confirmarRecarga = async (valor) => {
     chanceMostrarAnuncio();
     if (saldoBanco >= valor) {
@@ -137,37 +148,49 @@ const { ticket } = useTicket();
     >
       <Nav_Menu />
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
-  <TouchableOpacity onPress={trocarFoto}>
-    <Image
-      source={{
-        uri: user?.foto_url || "https://i.imgur.com/3I6eQpA.png",
-      }}
-      style={{
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        borderWidth: 2,
-        borderColor: tema.textoAtivo,
-        marginRight: 20, // espaço entre a imagem e o texto
-      }}
-    />
-  </TouchableOpacity>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 20,
+          }}
+        >
+          <TouchableOpacity onPress={trocarFoto}>
+            <Image
+              source={{
+                uri: user?.foto_url || "https://i.imgur.com/3I6eQpA.png",
+              }}
+              style={{
+                width: 120,
+                height: 120,
+                borderRadius: 60,
+                borderWidth: 2,
+                borderColor: tema.textoAtivo,
+                marginRight: 20, // espaço entre a imagem e o texto
+              }}
+            />
+          </TouchableOpacity>
 
-  <View>
-    <Text style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}>
-      Olá, {user.username}
-    </Text>
-    <Text style={{ color: tema.texto, fontSize: 25 }}>
-      saldo: R$:{saldo}
-    </Text>
-    {ticket ? (
-      <Text style={{ color: tema.texto, fontSize: 25 }}>Ticket Disponivel</Text>
-    ) : (
-      <Text style={{ color: tema.texto, fontSize: 25 }}>Ticket indisponivel</Text>
-    )}
-  </View>
-</View>
+          <View>
+            <Text
+              style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}
+            >
+              Olá, {user.username}
+            </Text>
+            <Text style={{ color: tema.texto, fontSize: 25 }}>
+              saldo: R$:{saldo}
+            </Text>
+            {ticket ? (
+              <Text style={{ color: tema.texto, fontSize: 25 }}>
+                Ticket Disponivel
+              </Text>
+            ) : (
+              <Text style={{ color: tema.texto, fontSize: 25 }}>
+                Ticket indisponivel
+              </Text>
+            )}
+          </View>
+        </View>
 
         <TouchableOpacity
           onPress={() => setModalVisivel(!modalVisivel)}
