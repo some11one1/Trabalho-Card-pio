@@ -62,51 +62,44 @@ export default function Perfil() {
     atualizarUsuario({ foto_url: url });
   };
   const trocarFoto = async () => {
-    try {
-      if (Platform.OS !== "web") {
-        const { status } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          alert("Permissão negada para acessar as fotos.");
-          return;
-        }
-
-        const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          allowsEditing: true,
-          quality: 1,
-        });
-
-        console.log("RESULTADO PICKER:", result);
-
-        if (result.canceled) return;
-
-        const uri = result.assets[0].uri;
-
-        // CORREÇÃO ANDROID — não usar fetch
-        const file = await uriParaBlob(uri);
-
-        await upload(file);
-      } else {
-        // Web
-        return new Promise((resolve) => {
-          const input = document.createElement("input");
-          input.type = "file";
-          input.accept = "image/*";
-
-          input.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            await upload(file);
-            resolve();
-          };
-
-          input.click();
-        });
+    if (Platform.OS !== "web") {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("Precisa de permissão para acessar as fotos");
+        return;
       }
-    } catch (error) {
-      console.log("Erro ao trocar foto:", error);
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // <-- aqui
+        quality: 1,
+      });
+
+      console.log("Resultado picker:", result);
+
+      if (!result.assets || result.assets.length === 0) return;
+
+      const uri = result.assets[0].uri;
+
+      // Expo recomenda usar FileSystem para ler o arquivo
+      const file = {
+        uri,
+        name: `foto_${user.id}.jpg`,
+        type: "image/jpeg",
+      };
+
+      await upload(file);
+    } else {
+      // Web
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.onchange = async (e) => {
+        const arquivo = e.target.files[0];
+        if (!arquivo) return;
+        await upload(arquivo);
+      };
+      input.click();
     }
   };
 
