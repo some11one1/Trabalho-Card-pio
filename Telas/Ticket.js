@@ -8,7 +8,9 @@ import {
   Modal,
   Dimensions,
   Button,
+  Alert,
 } from "react-native";
+import { AuthContext } from "../Context/AuthContext";
 import { useAnuncio } from "../Context/AnuncioContext";
 import React, { useContext, useState, useEffect } from "react";
 import { usarTheme } from "../Context/ThemeContext";
@@ -16,7 +18,8 @@ import { ProdutosContext } from "../Context/produtoContext";
 import Icon from "react-native-vector-icons/Entypo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Nav_Menu from "../Componentes/nav_menu";
-import { TicketContext } from "../Context/TicketContext";
+import { useTicket } from "../Context/TicketContext";
+
 import { useHistorico } from "../Context/HistoricoContext";
 const screenWidth = Dimensions.get("window").width;
 const numColumns = 3;
@@ -25,10 +28,12 @@ const margin = 8;
 const itemWidth = screenWidth / numColumns - margin * 2;
 
 export default function Ticket({ navigation, route }) {
+  
+const { user } = useContext(AuthContext);
   const [produtoSelect, setProdutoSelect] = useState(null);
   const { ColocarNoHistorico } = useHistorico();
   const [modalVisivel, setModalVisivel] = useState(false);
-  const { ticket } = useContext(TicketContext);
+const { ticket, usarTicket } = useTicket();
   const { chanceMostrarAnuncio } = useAnuncio();
   const { produtos, listarProdutos } = useContext(ProdutosContext);
   const { tema } = usarTheme();
@@ -49,8 +54,13 @@ export default function Ticket({ navigation, route }) {
         },
       ]}
       onPress={() => {
-        setProdutoSelect(item);
-        setModalVisivel(!modalVisivel);
+        ticket ? (
+          setProdutoSelect(item),
+          setModalVisivel(true)
+        ) : (
+          Alert.alert("Ticket indisponivel", "voce ja usou seu ticket hoje")
+        );
+   
       }}
     >
       <Image
@@ -86,11 +96,12 @@ export default function Ticket({ navigation, route }) {
       style={[styles.containerPrincipal, { backgroundColor: tema.background }]}
     >
       <Nav_Menu />
+
       <Modal
         transparent={true}
         animationType="fade"
         visible={modalVisivel}
-        onRequestClose={() => setModalVisivel(false)}
+        onRequestClose={() =>  setModalVisivel(false)}
       >
         <View
           style={{
@@ -118,9 +129,12 @@ export default function Ticket({ navigation, route }) {
             <View style={{ marginTop: 15 }}>
               <Button
                 title="sim"
-                onPress={() => {
+                onPress={async () => {
                   ColocarNoHistorico(produtoSelect.id, produtoSelect.Nome);
                   setModalVisivel(false);
+                  usarTicket(user.id);
+                  
+
                 }}
               />
               <Button

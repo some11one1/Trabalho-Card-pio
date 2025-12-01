@@ -45,32 +45,50 @@ export const AuthProvider = ({ children }) => {
     }
 
     const isAdmin = Boolean(data.is_admin); // converte em booleano (nem deve fazer diferença pq ja é booleano no SupaBase ahhhhhh (odeio esse java.lang ain ain nao pode ser string)
-    setUser({
-      // atualiza o estado do usuario com os dados retornados
-      id: data.id, // lembra do data na linha 13? é como se fosse um array, ai tem coisinhas do data, data.username, data.senha, etc
-      //e basicamente isso esta colocando esses dados no user (linha 9), tipo. o id vai ser o data.id
-      username: data.username,
-      role: isAdmin ? "admin" : "user", // se isAdmin for true, role é admin, se não, é user, essa informação vem do supabase
-      is_admin: isAdmin, // essa linha só existe pq eu fiquei 3 horas com o erro de string nao pode ser sei la o que booleana (ela não faz nada, mas vai ficar ai mesmo, mesmo coisa com a linha 23)
-    });
-    await AsyncStorage.setItem(
-      "usuario",
-      JSON.stringify({
-        id: data.id,
-        username: data.username,
-        role: isAdmin ? "admin" : "user",
-        is_admin: isAdmin,
-      })
-    );
-    return true; // retorna que é verdade, ou seja, deu certo, siginifica que o usuario foi logado com sucesso
+const usuarioAtualizado = {
+    id: data.id,
+    username: data.username,
+    role: isAdmin ? "admin" : "user",
+    is_admin: isAdmin,
+    foto_url: data.foto_url || null, 
   };
+
+  setUser(usuarioAtualizado);
+  await AsyncStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+
+  return true;
+};
 
   // func pra deslogar
   const logout = () => {
     setUser(null); // uau! se voce clicar pra sair da sua conta, o app voltar a ficar sem contar, mágica! (não esquecer de colocar isso no botão de logout depois)
     AsyncStorage.removeItem("usuario"); // remove o usuario salvo no AsyncStorage
   };
+const atualizarUsuario = async (dadosNovos) => {
+  if (!user) return false;
 
+  const { data, error } = await supabase
+    .from("usuarios")
+    .update(dadosNovos)
+    .eq("id", user.id)
+    .single();
+
+  if (error) {
+    console.log("Erro ao atualizar usuário:", error);
+    return false;
+  }
+
+  const usuarioAtualizado = {
+    ...user,
+    ...dadosNovos,
+  };
+
+  setUser(usuarioAtualizado);
+
+  await AsyncStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+
+  return true;
+};
   // funcao pro admin criar usúarios
   const CriarUsuario = async (username, senha, is_admin = false) => {
     //usa os parametros username, senha e is_admin pra fazer o novo usuario
@@ -139,6 +157,8 @@ export const AuthProvider = ({ children }) => {
         DeletarUsuario,
         ListarUsuarios,
         usuarios,
+        carregando,
+        atualizarUsuario,
       }}
     >
       {children}

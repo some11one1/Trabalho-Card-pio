@@ -4,8 +4,11 @@ import {
   Button,
   TextInput,
   Modal,
+  Image,
+  Platform,
   TouchableOpacity,
-} from "react-native"; //  >>>>> não esquece de importar aqui se for colocar coisas tipo TouchableOpacity
+} from "react-native"; 
+import { fotoManager } from "../Componentes/carregarFoto";
 import React, { useContext, useEffect, useState } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { WalletContext } from "../Context/WalletContext";
@@ -14,7 +17,7 @@ import { supabase } from "../Supabase";
 import Nav_Menu from "../Componentes/nav_menu";
 import { AuthContext } from "../Context/AuthContext";
 import { useAnuncio } from "../Context/AnuncioContext";
-import { TicketContext } from "../Context/TicketContext";
+import { useTicket } from "../Context/TicketContext";
 export default function Perfil() {
   const { chanceMostrarAnuncio } = useAnuncio();
   const [modalVisivel, setModalVisivel] = useState(false);
@@ -26,8 +29,77 @@ export default function Perfil() {
     setSaldoBanco,
     carregarSaldoBanco,
   } = useContext(WalletContext);
-  const { user } = useContext(AuthContext);
-  const { ticket } = useContext(TicketContext);
+  const { user, atualizarUsuario } = useContext(AuthContext);
+  const upload = async (fileBlob) => {
+    const nome = `foto_${user.id}.jpg`;
+
+    const { data, error } = await supabase.storage
+      .from("avatars")
+      .upload(nome, fileBlob, {
+        upsert: true,
+        contentType: "image/jpeg",
+      });
+
+    if (error) {
+      console.log("Erro no upload:", error);
+      return;
+    }
+
+  const { data: urlData } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(nome);
+    
+  let url = urlData.publicUrl + `?t=${Date.now()}`;
+
+    console.log("URL FOTO:", url);
+
+    // salva no banco
+   await supabase.from("usuarios").update({ foto_url: url }).eq("id", user.id);
+   atualizarUsuario({ foto_url: url });
+  };
+const trocarFoto = async () => {
+  let file;
+
+  // celular
+  if (Platform.OS !== "web") {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+    });
+
+    if (result.canceled) return;
+
+    const uri = result.assets[0].uri;
+    const fetchImg = await fetch(uri);
+    file = await fetchImg.blob(); 
+  }
+
+  // pc
+  else {
+    return new Promise((resolve) => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+
+      input.onchange = async (e) => {
+        const arquivo = e.target.files[0];
+        if (!arquivo) return;
+
+        file = arquivo;
+
+        await upload(file);
+        resolve();
+      };
+
+      input.click();
+    });
+  }
+
+  if (Platform.OS !== "web") {
+    await upload(file);
+  }
+};
+const { ticket } = useTicket();
   const confirmarRecarga = async (valor) => {
     chanceMostrarAnuncio();
     if (saldoBanco >= valor) {
@@ -65,23 +137,38 @@ export default function Perfil() {
     >
       <Nav_Menu />
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <View>
-          <Text style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}>
-            Olá, {user.username}
-          </Text>
-          <Text style={{ color: tema.texto, fontSize: 25 }}>
-            saldo: R$:{saldo}
-          </Text>
-          {ticket ? (
-            <Text style={{ color: tema.texto, fontSize: 25 }}>
-              Ticket Disponivel
-            </Text>
-          ) : (
-            <Text style={{ color: tema.texto, fontSize: 25 }}>
-              Ticket indisponivel
-            </Text>
-          )}
-        </View>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
+  <TouchableOpacity onPress={trocarFoto}>
+    <Image
+      source={{
+        uri: user?.foto_url || "https://i.imgur.com/3I6eQpA.png",
+      }}
+      style={{
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        borderWidth: 2,
+        borderColor: tema.textoAtivo,
+        marginRight: 20, // espaço entre a imagem e o texto
+      }}
+    />
+  </TouchableOpacity>
+
+  <View>
+    <Text style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}>
+      Olá, {user.username}
+    </Text>
+    <Text style={{ color: tema.texto, fontSize: 25 }}>
+      saldo: R$:{saldo}
+    </Text>
+    {ticket ? (
+      <Text style={{ color: tema.texto, fontSize: 25 }}>Ticket Disponivel</Text>
+    ) : (
+      <Text style={{ color: tema.texto, fontSize: 25 }}>Ticket indisponivel</Text>
+    )}
+  </View>
+</View>
+
         <TouchableOpacity
           onPress={() => setModalVisivel(!modalVisivel)}
           style={{

@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthProvider, AuthContext } from "./Context/AuthContext";
 import { ThemeProvider, usarTheme } from "./Context/ThemeContext";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-
+import Chat from "./Telas/FeedChat";
 import ConfigUsuarios from "./Telas/ConfigUsuarios";
 import AdminHome from "./Telas/AdminHome";
 import Home from "./Telas/Home";
@@ -30,6 +30,7 @@ import { SegredoProvider } from "./indexx";
 import { HistoricoProvider } from "./Context/HistoricoContext";
 import { CarrinhoProvider } from "./Context/CarrinhoContext";
 import { AnuncioProvider } from "./Context/AnuncioContext";
+import { ChatProvider } from "./Context/ChatContext";
 
 // Tabs
 //cada Tab.Screen é uma aba, com nome e componente, componente é o que foi importando lá em cima, tem que ser mesmo nome, já o name tanto faz
@@ -210,19 +211,27 @@ const HomeDrawer = () => {
           headerShown: false,
         })}
       />
-      <Drawer.Screen
-        name="Ticket"
-        component={user?.role === "admin" ? null : Ticket}
-        options={() => ({
-          headerShown: false,
-        })}
-      />
+      {user?.role !== "admin" && (
+        <Drawer.Screen
+          name="Ticket"
+          component={Ticket}
+          options={{ headerShown: false }}
+        />
+      )}
       <Drawer.Screen
         name="Perfil"
         component={Perfil}
         options={() => ({
           headerShown: false,
         })}
+      />
+      <Drawer.Screen
+        name="Chat"
+        component={Chat}
+        options={{
+          headerShown: true,
+          title: "Chat Global",
+        }}
       />
       <Drawer.Screen
         name="Sobre"
@@ -280,9 +289,11 @@ export default function App() {
                 <ProdutosProvider>
                   <CarrinhoProvider>
                     <HistoricoProvider>
-                      <NavigationContainer>
-                        <AppStack />
-                      </NavigationContainer>
+                      <ChatProvider>
+                        <NavigationContainer>
+                          <AppStack />
+                        </NavigationContainer>
+                      </ChatProvider>
                     </HistoricoProvider>
                   </CarrinhoProvider>
                 </ProdutosProvider>
