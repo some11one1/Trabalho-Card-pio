@@ -15,10 +15,8 @@ import { AuthContext } from "../Context/AuthContext";
 import { useAnuncio } from "../Context/AnuncioContext";
 import { CarrinhoContext } from "../Context/CarrinhoContext";
 
-
 import Icon from "react-native-vector-icons/Entypo";
 import Icon2 from "react-native-vector-icons/MaterialIcons";
-
 
 export default function Pagamento({ navigation, route }) {
   const { ColocarNoHistorico } = useHistorico();

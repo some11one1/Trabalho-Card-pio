@@ -1,4 +1,5 @@
 import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system";
 import React, { useContext, useEffect, useState } from "react";
 import {
   View,
@@ -7,6 +8,7 @@ import {
   Image,
   Platform,
   TouchableOpacity,
+  Modal,
   Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -60,6 +62,7 @@ export default function Perfil() {
       const { data, error } = await supabase.storage
         .from("avatars")
         .upload(nome, fileData, {
+        .upload(nome, fileData, {
           upsert: true,
           contentType: "image/jpeg",
           cacheControl: "0",
@@ -81,13 +84,21 @@ export default function Perfil() {
         .from("usuarios")
         .update({ foto_url: url })
         .eq("id", user.id);
+      await supabase
+        .from("usuarios")
+        .update({ foto_url: url })
+        .eq("id", user.id);
       atualizarUsuario({ foto_url: url });
+    } catch (err) {
+      console.log("Erro geral no upload:", err);
     } catch (err) {
       console.log("Erro geral no upload:", err);
     }
   };
   const trocarFoto = async () => {
     if (Platform.OS !== "web") {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
@@ -99,11 +110,17 @@ export default function Perfil() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 0.7,
         base64: true,
+        quality: 0.7,
+        base64: true,
       });
 
       if (!result.assets || result.assets.length === 0) return;
 
+
       const uri = result.assets[0].uri;
+      const base64 = result.assets[0].base64;
+
+      await upload({ base64 });
       const base64 = result.assets[0].base64;
 
       await upload({ base64 });
@@ -124,6 +141,8 @@ export default function Perfil() {
   const confirmarRecarga = async (valor) => {
     chanceMostrarAnuncio();
 
+    chanceMostrarAnuncio();
+
     if (saldoBanco >= valor) {
       const novoSaldo = saldo + valor;
       const novoSaldoBanco = saldoBanco - valor;
@@ -140,8 +159,13 @@ export default function Perfil() {
         console.log("Erro ao atualizar saldo");
         setSaldo(saldo);
         setSaldoBanco(saldoBanco);
+        console.log("Erro ao atualizar saldo");
+        setSaldo(saldo);
+        setSaldoBanco(saldoBanco);
       }
     } else {
+      alert("Saldo insuficiente");
+      console.log(saldoBanco);
       alert("Saldo insuficiente");
       console.log(saldoBanco);
     }
@@ -155,8 +179,24 @@ export default function Perfil() {
         backgroundColor: tema.background,
       }}
     >
+    <SafeAreaView
+      style={{
+        flex: 1,
+        alignItems: "center",
+        backgroundColor: tema.background,
+      }}
+    >
       <Nav_Menu />
 
+      <View style={{ flex: 0 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 20,
+          }}
+        >
+          <TouchableOpacity onPress={trocarFoto}>
       <View style={{ flex: 0 }}>
         <View
           style={{
@@ -180,9 +220,27 @@ export default function Perfil() {
                 borderColor: tema.textoAtivo,
                 marginRight: 20,
               }}
+              source={{
+                uri:
+                  user?.foto_url ||
+                  "https://i.pinimg.com/474x/73/14/cc/7314cc1a88bf3cdc48347ab186e12e81.jpg",
+              }}
+              style={{
+                width: 120,
+                height: 120,
+                borderRadius: 60,
+                borderWidth: 2,
+                borderColor: tema.textoAtivo,
+                marginRight: 20,
+              }}
             />
           </TouchableOpacity>
 
+          <View>
+            <Text
+              style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}
+            >
+              Olá, {user.username}
           <View>
             <Text
               style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}
@@ -205,6 +263,11 @@ export default function Perfil() {
                 </Text>
               </>
             )}
+                <Text style={{ color: tema.texto, fontSize: 25 }}>
+                  {ticket ? "Ticket Disponível" : "Ticket Indisponível"}
+                </Text>
+              </>
+            )}
           </View>
         </View>
       </View>
@@ -222,12 +285,52 @@ export default function Perfil() {
           borderRadius: 10,
           borderColor: tema.texto,
         }}
+        style={{
+          position: "absolute",
+          bottom: 60,
+          alignSelf: "center",
+          backgroundColor: tema.cardBackground,
+          paddingVertical: 12,
+          paddingHorizontal: 20,
+          borderWidth: 2,
+          borderRadius: 10,
+          borderColor: tema.texto,
+        }}
       >
+        <Text style={{ fontSize: 22, fontWeight: "600", color: tema.texto }}>
         <Text style={{ fontSize: 22, fontWeight: "600", color: tema.texto }}>
           Recarregar
         </Text>
       </TouchableOpacity>
 
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={modalVisivel}
+        onRequestClose={() => setModalVisivel(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              width: 250,
+              backgroundColor: "white",
+              borderRadius: 15,
+              padding: 20,
+              alignItems: "center",
+              justifyContent: "center",
+              elevation: 5,
+            }}
+          >
+            <Text style={{ fontSize: 18, marginBottom: 10 }}>
+              Recarregar Saldo
+            </Text>
       <Modal
         transparent={true}
         animationType="fade"
@@ -264,7 +367,19 @@ export default function Perfil() {
                 justifyContent: "center",
               }}
             >
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "center",
+              }}
+            >
               {["10", "25", "50", "100"].map((v) => (
+                <View key={v} style={{ margin: 5 }}>
+                  <Button
+                    title={`R$${v}`}
+                    onPress={() => confirmarRecarga(Number(v))}
+                  />
                 <View key={v} style={{ margin: 5 }}>
                   <Button
                     title={`R$${v}`}
@@ -275,6 +390,11 @@ export default function Perfil() {
             </View>
 
             <View style={{ marginTop: 15 }}>
+              <Button
+                title="Fechar"
+                color="red"
+                onPress={() => setModalVisivel(false)}
+              />
               <Button
                 title="Fechar"
                 color="red"
