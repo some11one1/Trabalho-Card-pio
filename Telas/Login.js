@@ -2,7 +2,7 @@ import { View, Text, Button, TextInput, Alert, StyleSheet, Image, TouchableOpaci
 import { AuthContext } from "../Context/AuthContext";
 import React, { useContext, useState } from "react";
 import { Feather } from "@expo/vector-icons";
-
+import { supabase } from "../Supabase";
 export default function Login() {
   const { loginUser } = useContext(AuthContext);
   const [username, setUsername] = React.useState("");

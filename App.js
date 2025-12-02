@@ -7,6 +7,7 @@ import { AuthProvider, AuthContext } from "./Context/AuthContext";
 import { ThemeProvider, usarTheme } from "./Context/ThemeContext";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Chat from "./Telas/FeedChat";
+import { supabase } from "./Supabase";
 import ConfigUsuarios from "./Telas/ConfigUsuarios";
 import AdminHome from "./Telas/AdminHome";
 import Home from "./Telas/Home";
@@ -15,6 +16,7 @@ import Perfil from "./Telas/Perfil";
 import Historico from "./Telas/Historico";
 import Carrinho from "./Telas/Carrinho";
 import Sobre from "./Telas/Sobre";
+
 import Configuracoes from "./Telas/Configuracoes";
 import { FontAwesome } from "@expo/vector-icons";
 import Ticket from "./Telas/Ticket";

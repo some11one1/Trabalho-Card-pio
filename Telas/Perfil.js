@@ -16,12 +16,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../Supabase";
 import Nav_Menu from "../Componentes/nav_menu";
 import { AuthContext } from "../Context/AuthContext";
+import { usarTheme } from "../Context/ThemeContext";
+import { WalletContext } from "../Context/WalletContext";
 import { useAnuncio } from "../Context/AnuncioContext";
 import { useTicket } from "../Context/TicketContext";
+
 
 export default function Perfil() {
   const { chanceMostrarAnuncio } = useAnuncio();
   const [modalVisivel, setModalVisivel] = useState(false);
+
 
   const {
     saldo,
@@ -68,11 +72,20 @@ export default function Perfil() {
         console.log("Erro no upload:", error);
         return;
       }
+      if (error) {
+        console.log("Erro no upload:", error);
+        return;
+      }
 
       const { data: urlData } = supabase.storage
         .from("avatars")
         .getPublicUrl(nome);
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(nome);
 
+      const url = urlData.publicUrl + `?nocache=${Date.now()}`;
+      console.log("URL FOTO:", url);
       const url = urlData.publicUrl + `?nocache=${Date.now()}`;
       console.log("URL FOTO:", url);
 
@@ -120,12 +133,15 @@ export default function Perfil() {
     if (saldoBanco >= valor) {
       const novoSaldo = saldo + valor;
       const novoSaldoBanco = saldoBanco - valor;
+
       setSaldo(novoSaldo);
       setSaldoBanco(novoSaldoBanco);
+
       const { error } = await supabase
         .from("usuarios")
         .update({ saldo: novoSaldo, saldoBanco: novoSaldoBanco })
         .eq("id", user.id);
+
       if (error) {
         console.log("erro ao atualizar saldo");
         // rollbacks simples

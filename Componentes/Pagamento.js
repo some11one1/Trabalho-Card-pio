@@ -15,11 +15,11 @@ import { AuthContext } from "../Context/AuthContext";
 import { useAnuncio } from "../Context/AnuncioContext";
 import { CarrinhoContext } from "../Context/CarrinhoContext";
 
-// Icones que colocamos gustavo
+
 import Icon from "react-native-vector-icons/Entypo";
 import Icon2 from "react-native-vector-icons/MaterialIcons";
 
-// FEITO POR IA, se inspire nela e re faça o código, essa tela será refeita, e essa tela é uma base para termos uma noção
+
 export default function Pagamento({ navigation, route }) {
   const { ColocarNoHistorico } = useHistorico();
   const { chanceMostrarAnuncio } = useAnuncio();

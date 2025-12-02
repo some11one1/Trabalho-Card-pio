@@ -38,9 +38,9 @@ const { ticket, usarTicket } = useTicket();
   const { produtos, listarProdutos } = useContext(ProdutosContext);
   const { tema } = usarTheme();
 
-  useEffect(() => {
-    listarProdutos();
-  }, []);
+ useEffect(() => {
+  listarProdutos();
+ }, [ticket]);
 
   const renderProduto = ({ item }) => (
     <TouchableOpacity
