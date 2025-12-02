@@ -6,12 +6,13 @@ import {
   Image,
   StyleSheet,
   Dimensions,
+  Modal
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Entypo";
 import { useAnuncio } from "../Context/AnuncioContext"
 import { useRoute } from "@react-navigation/native";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 
 import { WalletContext } from "../Context/WalletContext";
 import { AuthContext } from "../Context/AuthContext";
@@ -24,25 +25,35 @@ import { supabase } from "../Supabase";
 const { width } = Dimensions.get("window");
 
 export default function CardProduto({ navigation }) {
-   const { chanceMostrarAnuncio} = useAnuncio()
+
+
+  const { chanceMostrarAnuncio } = useAnuncio()
   const route = useRoute();
 
 
-  const { produtoId, produtoPreco, produtoNome, produtoImg } = route.params;
+  const { produtoId, produtoPreco, produtoNome, produtoImg, produtoEstoque } = route.params;
 
 
   const { saldo, setSaldo } = useContext(WalletContext);
+  const { Estoque } = useState(0);
   const { user } = useContext(AuthContext);
   const { ColocarNoHistorico } = useHistorico();
   const { AdicionarAoCarrinho } = useContext(CarrinhoContext);
   const { tema } = usarTheme();
+  const [modalVisivel, setModalVisivel] = useState(false);
 
-  
- 
+
+
   const adicionarCarrinho = async () => {
     await chanceMostrarAnuncio();
-    console.log("ADICIONAR AO CARRINHO ->", { produtoId, produtoNome, produtoPreco, produtoImg });
-    AdicionarAoCarrinho(produtoId, produtoNome, produtoPreco, produtoImg);
+    if (produtoEstoque <= 0) {
+      console.log(`O produto ${produtoNome} está sem estoque.`);
+      setModalVisivel(true);
+    } else {
+      // console.log("ADICIONAR AO CARRINHO ->", { produtoId, produtoNome, produtoPreco, produtoImg, produtoEstoque });
+      console.log(produtoEstoque)
+      AdicionarAoCarrinho(produtoId, produtoNome, produtoPreco, produtoImg, produtoEstoque);
+    }
   };
 
   return (
@@ -65,9 +76,10 @@ export default function CardProduto({ navigation }) {
           paddingHorizontal: 10,
         }}
       >
-        <TouchableOpacity onPress={async () => { 
+        <TouchableOpacity onPress={async () => {
           await chanceMostrarAnuncio();
-          navigation.goBack()}}>
+          navigation.goBack()
+        }}>
           <Icon name="chevron-left" color={tema.texto} size={34} />
         </TouchableOpacity>
 
@@ -86,14 +98,14 @@ export default function CardProduto({ navigation }) {
         <View style={{ width: 35 }} />
       </View>
 
-  
+
       <Image
         style={styles.img}
         source={{ uri: produtoImg }}
         resizeMode="cover"
       />
 
-   
+
       <Text style={{ color: tema.texto, fontWeight: "bold", fontSize: 30 }}>
         {produtoNome}
       </Text>
@@ -134,9 +146,9 @@ export default function CardProduto({ navigation }) {
         ID do produto: {produtoId}
       </Text>
 
-   
+
       <View style={[styles.footerAcoes, { backgroundColor: tema.background }]}>
-  
+
         <TouchableOpacity
           onPress={adicionarCarrinho}
           style={[
@@ -153,13 +165,14 @@ export default function CardProduto({ navigation }) {
 
 
         <TouchableOpacity
-          onPress={async() => {
+          onPress={async () => {
             await chanceMostrarAnuncio();
             navigation.navigate("Pagamento", {
               produtoId,
               produtoNome,
               produtoPreco,
               produtoImg,
+              produtoEstoque,
             })
           }}
           style={[styles.btnAcao, styles.btnComprar]}
@@ -170,6 +183,41 @@ export default function CardProduto({ navigation }) {
           </Text>
         </TouchableOpacity>
       </View>
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={modalVisivel}
+        onRequestClose={() => setModalVisivel(false)}
+      >
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() => setModalVisivel(false)}
+        >
+          <View
+            style={{
+              width: 250,
+              backgroundColor: tema.background,
+              borderRadius: 15,
+              padding: 30,
+              alignItems: "center",
+              justifyContent: "center",
+              elevation: 5,
+              borderWidth: 2,
+              borderColor: tema.textoAtivo
+            }}
+          >
+            <Icon name="box" color={tema.iconEstoque} size={34} />
+            <Text style={{ fontSize: 18, marginBottom: 10, color: tema.texto, fontWeight: "bold" }}>
+              Em falta no estoque!
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }

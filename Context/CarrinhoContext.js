@@ -42,7 +42,8 @@ export const CarrinhoProvider = ({ children }) => {
         nome: p1.nome,
         preco: Number(p1.preco || 0),
         produtoImg: p1.produtoImg || p1.image || null,
-        descricao: p1.descricao || "",
+        produtoEstoque: Number(p1.produtoEstoque || 0),
+     
       };
     } else {
       novoItem = {
@@ -50,10 +51,11 @@ export const CarrinhoProvider = ({ children }) => {
         nome: p2,
         preco: Number(p3 || 0),
         produtoImg: p4 || null,
-        descricao: p5 || "",
+        produtoEstoque: Number(p5 || 0),
+     
       };
     }
-
+    console.log("a", p1.produtoEstoque)
     if (novoItem.id === undefined) return;
 
     const existsIndex = carrinho.findIndex((it) => String(it.id) === String(novoItem.id));
@@ -72,6 +74,7 @@ export const CarrinhoProvider = ({ children }) => {
         preco: Number(novoItem.preco || 0),
         produtoImg: novoItem.produtoImg || null,
         descricao: novoItem.descricao || "",
+        produtoEstoque: Number(novoItem.produtoEstoque || 0),
         quantidade: 1,
         total: Number(novoItem.preco || 0),
       };

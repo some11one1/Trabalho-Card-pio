@@ -39,20 +39,22 @@ export default function Pagamento({ navigation, route }) {
     produtoPreco = null,
     produtoImg = null,
     qndtd = null,
+    produtoEstoque = null,
   } = route.params || {};
 
   // Determina se é compra direta ou via carrinho
   const itens = carrinho
     ? carrinho
     : [
-        {
-          id: produtoId,
-          nome: produtoNome,
-          preco: produtoPreco,
-          img: produtoImg,
-          quantidade: qndtd,
-        },
-      ];
+      {
+        id: produtoId,
+        nome: produtoNome,
+        preco: produtoPreco,
+        img: produtoImg,
+        quantidade: qndtd,
+        estoque: produtoEstoque,
+      },
+    ];
 
   const total = totalGeral ? totalGeral : produtoPreco;
   const [metodo, setMetodo] = useState(null);
@@ -127,6 +129,7 @@ export default function Pagamento({ navigation, route }) {
         contentContainerStyle={{ padding: 20 }}
       >
         {itens.map((item, i) => (
+          
           <View
             key={i}
             style={[styles.cardItem, { backgroundColor: tema.card }]}
@@ -145,6 +148,10 @@ export default function Pagamento({ navigation, route }) {
                 Quantidade: {item.quantidade}
               </Text>
             )}
+
+            <Text style={[styles.itemNome, { color: tema.texto }]}>
+              Estoque do produto: {item.produtoEstoque}
+            </Text>
 
             <Text style={[styles.itemPreco, { color: tema.textoAtivo }]}>
               R$ {item.preco.toFixed(2).replace(".", ",")}

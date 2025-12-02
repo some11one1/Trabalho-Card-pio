@@ -32,6 +32,7 @@ export const ThemeProvider = ({ children }) => {
       textoAtivo: isModoEscuro ? "#869cfcff" : "#314096ff",
       cardBackground: isModoEscuro ? "#000000" : "#FFFFFF",
       borda: isModoEscuro ? "#ccc4" : "#080808",
+      iconEstoque: isModoEscuro ? "#FF9400" : "#19619C",
     };
   }, [isModoEscuro]);
   return (

@@ -50,10 +50,10 @@ export const UserTabs = () => {
 
   const renderIcon =
     (name) =>
-    ({ focused, color, size }) => {
-      // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
-      return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
-    };
+      ({ focused, color, size }) => {
+        // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
+        return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
+      };
 
   return (
     <Tab.Navigator
@@ -123,10 +123,10 @@ export const AdminTabs = () => {
 
   const renderIcon =
     (name) =>
-    ({ focused, color, size }) => {
-      // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
-      return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
-    };
+      ({ focused, color, size }) => {
+        // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
+        return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
+      };
 
   return (
     <Tab.Navigator

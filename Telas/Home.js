@@ -15,6 +15,8 @@ import Icon from "react-native-vector-icons/Entypo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Nav_Menu from "../Componentes/nav_menu";
 import { supabase } from "../Supabase";
+
+
 const screenWidth = Dimensions.get("window").width;
 const numColumns = 3;
 const margin = 8;
@@ -67,6 +69,7 @@ export default function Home({ navigation, route }) {
           produtoPreco: item.Valor,
           produtoNome: item.Nome,
           produtoImg: item.img,
+          produtoEstoque: item.Estoque,
         });
       }}
     >

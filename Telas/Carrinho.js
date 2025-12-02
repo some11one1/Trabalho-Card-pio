@@ -49,7 +49,19 @@ export default function Carrinho({ navigation }) {
 
   const irParaPagamento = async () => {
     await chanceMostrarAnuncio();
-    navigation.navigate("Pagamento", { carrinho, totalGeral, qntd: quantidadeTotal });
+    navigation.navigate("Pagamento", {
+      carrinho: carrinho.map(item => ({
+        id: item.id,
+        nome: item.nome,
+        preco: item.preco,
+        quantidade: item.quantidade,
+        estoque: item.produtoEstoque,
+        img: item.produtoImg,
+      })),
+      totalGeral,
+      qntd: quantidadeTotal
+    });
+
   };
 
   const renderItem = ({ item }) => {
@@ -59,6 +71,9 @@ export default function Carrinho({ navigation }) {
         ? { uri: imageUri }
         : { uri: placeholder };
 
+        console.log("ITEM NO CARRINHO:", item);
+
+
     return (
       <View style={[styles.card, { backgroundColor: tema.cardBackground, borderColor: tema.borda }]}>
         <View style={styles.left}>
@@ -66,7 +81,7 @@ export default function Carrinho({ navigation }) {
             {item.nome}
           </Text>
 
-          <Text style={[styles.subtitle, { color: tema.texto }]}>{item.descricao || "Produto do app"}</Text>
+          <Text style={[styles.subtitle, { color: tema.texto }]}>{`Estoque: ${item.produtoEstoque}` || 0}</Text>
 
           <View style={styles.row}>
             <Text style={[styles.price, { color: tema.textoAtivo }]}>
