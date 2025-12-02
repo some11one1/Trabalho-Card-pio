@@ -41,7 +41,8 @@ export default function CardProduto({ navigation }) {
  
   const adicionarCarrinho = async () => {
     await chanceMostrarAnuncio();
-    AdicionarAoCarrinho(produtoId, produtoNome, produtoPreco);
+    console.log("ADICIONAR AO CARRINHO ->", { produtoId, produtoNome, produtoPreco, produtoImg });
+    AdicionarAoCarrinho(produtoId, produtoNome, produtoPreco, produtoImg);
   };
 
   return (
