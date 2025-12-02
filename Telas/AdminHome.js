@@ -11,7 +11,7 @@ import {
   Alert,
   TextInput,
 } from "react-native";
-import { supabase } from "../Supabase"; 
+import { supabase } from "../Supabase";
 import { AuthContext } from "../Context/AuthContext";
 import { useAnuncio } from "../Context/AnuncioContext";
 import React, { useContext, useState, useEffect } from "react";
@@ -30,7 +30,7 @@ const itemWidth = screenWidth / numColumns - margin * 2;
 
 export default function AdminHome({ navigation, route }) {
   const [novoDisponivel, setNovoDisponivel] = useState(true);
-const { user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [produtoSelect, setProdutoSelect] = useState(null);
   const { ColocarNoHistorico } = useHistorico();
   const [modalVisivel, setModalVisivel] = useState(false);
@@ -39,29 +39,28 @@ const { user } = useContext(AuthContext);
   const [novoValor, setNovoValor] = useState("");
   const { tema } = usarTheme();
 
- useEffect(() => {
-   listarProdutos();
+  useEffect(() => {
+    listarProdutos();
 
-  
-   const canal = supabase
-     .channel("produtos-changes")
-     .on(
-       "postgres_changes",
-       {
-         event: "*", 
-         schema: "public",
-         table: "produtos",
-       },
-       (payload) => {
-         console.log( payload);
-         listarProdutos(); 
-       }
-     )
-     .subscribe();
-   return () => {
-     supabase.removeChannel(canal);
-   };
- }, []);
+    const canal = supabase
+      .channel("produtos-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "produtos",
+        },
+        (payload) => {
+          console.log(payload);
+          listarProdutos();
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(canal);
+    };
+  }, []);
 
   const renderProduto = ({ item }) => (
     <TouchableOpacity
@@ -77,7 +76,7 @@ const { user } = useContext(AuthContext);
       onPress={() => {
         setProdutoSelect(item);
         setNovoValor(item.Valor.toString());
-        setNovoDisponivel(item.disponivel); 
+        setNovoDisponivel(item.disponivel);
         setModalVisivel(true);
       }}
     >
@@ -141,10 +140,13 @@ const { user } = useContext(AuthContext);
               Editar produto
             </Text>
 
-     
             <TextInput
               value={novoValor}
-              onChangeText={setNovoValor}
+              onChangeText={(text) => {
+                const valorNumerico =
+                  parseFloat(text.replace(/[^0-9.]/g, "")) || 0;
+                setNovoValor(valorNumerico.toString());
+              }}
               placeholder="Preço (ex: 12.50)"
               placeholderTextColor={tema.texto + "70"}
               keyboardType="numeric"
@@ -178,7 +180,6 @@ const { user } = useContext(AuthContext);
               </Text>
             </TouchableOpacity>
 
-      
             <TouchableOpacity
               style={{
                 width: "100%",
@@ -203,7 +204,7 @@ const { user } = useContext(AuthContext);
                   Alert.alert("Erro", "Não foi possível salvar.");
                   console.log(error);
                 } else {
-                  listarProdutos(); 
+                  listarProdutos();
                   setModalVisivel(false);
                 }
               }}
