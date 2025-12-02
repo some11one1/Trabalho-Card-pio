@@ -2,7 +2,7 @@ import * as ImagePicker from "expo-image-picker";
 import { supabase } from "../Supabase";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
-
+import { supabase } from "../Supabase";
 export async function fotoManager(userId) {
 
   const result = await ImagePicker.launchImageLibraryAsync({

@@ -14,7 +14,7 @@ import { ProdutosContext } from "../Context/produtoContext";
 import Icon from "react-native-vector-icons/Entypo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Nav_Menu from "../Componentes/nav_menu";
-
+import { supabase } from "../Supabase";
 const screenWidth = Dimensions.get("window").width;
 const numColumns = 3;
 const margin = 8;
@@ -26,10 +26,29 @@ export default function Home({ navigation, route }) {
   const { produtos, listarProdutos } = useContext(ProdutosContext);
   const { tema } = usarTheme();
 
-  useEffect(() => {
-    listarProdutos();
-  }, []);
+ useEffect(() => {
+   listarProdutos();
 
+  
+   const canal = supabase
+     .channel("produtos-changes")
+     .on(
+       "postgres_changes",
+       {
+         event: "*", 
+         schema: "public",
+         table: "produtos",
+       },
+       (payload) => {
+         console.log( payload);
+         listarProdutos(); 
+       }
+     )
+     .subscribe();
+   return () => {
+     supabase.removeChannel(canal);
+   };
+ }, []);
   const renderProduto = ({ item }) => (
     <TouchableOpacity
       style={[
@@ -57,7 +76,6 @@ export default function Home({ navigation, route }) {
         resizeMode="cover"
       />
 
-      {/* 2. Informações (Nome e Preço) */}
       <View style={styles.produtoInfo}>
         <Text
           numberOfLines={2}
@@ -71,7 +89,7 @@ export default function Home({ navigation, route }) {
       </View>
     </TouchableOpacity>
   );
-
+const filtroProdutoDisponivel = produtos.filter((produto) => produto.disponivel);
   return (
     <SafeAreaView
       style={[styles.containerPrincipal, { backgroundColor: tema.background }]}
@@ -79,7 +97,7 @@ export default function Home({ navigation, route }) {
       <Nav_Menu />
 
       <FlatList
-        data={produtos}
+        data={filtroProdutoDisponivel}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderProduto}
         contentContainerStyle={styles.listaContainer}
