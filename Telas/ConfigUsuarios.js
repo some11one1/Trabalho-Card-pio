@@ -1,10 +1,18 @@
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { AuthContext } from "../Context/AuthContext";
 
 export default function ConfigUsuarios() {
-  const { CriarUsuario, DeletarUsuario, ListarUsuarios, usuarios } = useContext(AuthContext);
+  const { CriarUsuario, DeletarUsuario, ListarUsuarios, usuarios } =
+    useContext(AuthContext);
   const { tema, isModoEscuro } = usarTheme();
 
   const [username, setUsername] = useState("");
@@ -22,7 +30,7 @@ export default function ConfigUsuarios() {
     }
     const sucesso = await CriarUsuario(username, senha, is_admin);
     if (!sucesso) {
-      alert("Erro ao criar usuário");
+      alert("Erro ao criar usuário, Usuário já existe.");
       return;
     }
     ListarUsuarios();
@@ -31,16 +39,13 @@ export default function ConfigUsuarios() {
     setIs_Admin(false);
   };
 
-  
   const corDeletar = isModoEscuro ? "#FFFFFF" : tema.perigo;
 
   return (
     <View style={[styles.container, { backgroundColor: tema.background }]}>
-      
-      {/* ---------- Criar usuário ---------- */}
       <View style={styles.criarContainer}>
         <Text style={[styles.title, { color: tema.texto }]}>Criar Usuário</Text>
-        
+
         <TextInput
           style={[styles.input, { borderColor: tema.texto, color: tema.texto }]}
           placeholder="Usuário"
@@ -48,7 +53,7 @@ export default function ConfigUsuarios() {
           value={username}
           onChangeText={setUsername}
         />
-        
+
         <TextInput
           style={[styles.input, { borderColor: tema.texto, color: tema.texto }]}
           placeholder="Senha"
@@ -62,26 +67,33 @@ export default function ConfigUsuarios() {
           style={[styles.toggleButton, { borderColor: tema.texto }]}
           onPress={() => setIs_Admin(!is_admin)}
         >
-          <Text style={{ color: tema.texto }}>{is_admin ? "É admin" : "Não é admin"}</Text>
+          <Text style={{ color: tema.texto }}>
+            {is_admin ? "É admin" : "Não é admin"}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.criarButton, { backgroundColor: tema.textoAtivo }]}
           onPress={handleCriarUsuario}
         >
-          <Text style={{ color: tema.textoReverse, fontWeight: "bold" }}>Criar Usuário</Text>
+          <Text style={{ color: tema.textoReverse, fontWeight: "bold" }}>
+            Criar Usuário
+          </Text>
         </TouchableOpacity>
       </View>
 
-      {/* ---------- Lista de usuários ---------- */}
       <View style={styles.listaContainer}>
-        <Text style={[styles.title, { color: tema.texto }]}>Lista de Usuários</Text>
+        <Text style={[styles.title, { color: tema.texto }]}>
+          Lista de Usuários
+        </Text>
 
         <FlatList
           data={usuarios}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={[styles.usuarioItem, { borderColor: tema.textoAtivo }]}>
+            <View
+              style={[styles.usuarioItem, { borderColor: tema.textoAtivo }]}
+            >
               <Text style={{ color: tema.texto }}>
                 {item.username} - {item.is_admin ? "Admin" : "User"}
               </Text>
