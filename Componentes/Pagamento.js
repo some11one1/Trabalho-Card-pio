@@ -15,7 +15,7 @@ import { supabase } from "../Supabase";
 
 export default function Pagamento({ navigation, route }) {
 
-  
+
   const { tema } = usarTheme();
   const { saldo, setSaldo, carregarSaldo } = useContext(WalletContext);
   const { ColocarNoHistorico } = useHistorico();
@@ -23,12 +23,12 @@ export default function Pagamento({ navigation, route }) {
   const { limparCarrinho } = useContext(CarrinhoContext);
   const { chanceMostrarAnuncio } = useAnuncio();
 
-  
+
   useEffect(() => {
     carregarSaldo();
   }, []);
 
-  
+
   const {
     carrinho,
     totalGeral,
@@ -40,7 +40,7 @@ export default function Pagamento({ navigation, route }) {
     produtoEstoque,
   } = route.params || {};
 
-  
+
   const itens = carrinho ?? [{
     id: produtoId,
     nome: produtoNome,
@@ -53,7 +53,7 @@ export default function Pagamento({ navigation, route }) {
   const total = totalGeral ?? produtoPreco;
   const valorCompra = total;
 
-  
+
   const [metodo, setMetodo] = useState(null);
 
   const metodosPagamento = [
@@ -62,7 +62,7 @@ export default function Pagamento({ navigation, route }) {
     { id: "saldo", nome: "Saldo da Conta", icone: "wallet" },
   ];
 
-  
+
   const atualizarEstoque = async (item) => {
     const quantidade = Number(item.quantidade || 1);
     const novoEstoque = item.produtoEstoque - quantidade;
@@ -80,7 +80,7 @@ export default function Pagamento({ navigation, route }) {
     return true;
   };
 
-  
+
   const confirmarPagamento = async () => {
 
     if (!metodo) {
@@ -88,7 +88,7 @@ export default function Pagamento({ navigation, route }) {
       return;
     }
 
-    
+
     if (metodo.nome === "Saldo da Conta") {
       if (saldo < valorCompra) {
         alert("Saldo insuficiente");
@@ -110,7 +110,7 @@ export default function Pagamento({ navigation, route }) {
       setSaldo(novoSaldo);
     }
 
-    
+
     for (const item of itens) {
 
       const sucesso = await atualizarEstoque(item);
@@ -128,14 +128,19 @@ export default function Pagamento({ navigation, route }) {
       );
     }
 
-    
-    if (carrinho) limparCarrinho();
+
+    if (carrinho) {
+      limparCarrinho();
+    } else {
+      // Envia os parâmetros de volta para a tela anterior
+      navigation.goBack();
+    }
 
     alert(`Pagamento confirmado via ${metodo.nome}`);
     navigation.goBack();
   };
 
-  
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: tema.background }]}>
 
@@ -155,25 +160,20 @@ export default function Pagamento({ navigation, route }) {
 
         {itens.map((item, i) => (
           <View key={i} style={[styles.cardItem, { backgroundColor: tema.card }]}>
-
             <Text style={[styles.itemNome, { color: tema.texto }]}>
               {item.nome}
             </Text>
-
             {!!item.quantidade && item.quantidade > 1 && (
               <Text style={[styles.itemQtd, { color: tema.textoSecundario || "#aaa" }]}>
                 Quantidade: {item.quantidade}
               </Text>
             )}
-
             <Text style={[styles.itemNome, { color: tema.texto }]}>
               Estoque disponível: {item.produtoEstoque}
             </Text>
-
             <Text style={[styles.itemPreco, { color: tema.textoAtivo }]}>
               R$ {item.preco.toFixed(2).replace(".", ",")}
             </Text>
-
           </View>
         ))}
 

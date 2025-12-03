@@ -11,8 +11,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Entypo";
 import { useAnuncio } from "../Context/AnuncioContext"
-import { useRoute } from "@react-navigation/native";
-import React, { useContext, useState } from "react";
+import { useRoute, useFocusEffect } from "@react-navigation/native";
+import React, { useContext, useState, useEffect } from "react";
 
 import { WalletContext } from "../Context/WalletContext";
 import { AuthContext } from "../Context/AuthContext";
@@ -28,31 +28,65 @@ export default function CardProduto({ navigation }) {
 
 
   const { chanceMostrarAnuncio } = useAnuncio()
+  
   const route = useRoute();
+  const { carrinho, AdicionarAoCarrinho } = useContext(CarrinhoContext);
+  const { tema } = usarTheme();
 
+  // Estado para armazenar os parâmetros do produto
+  const [produto, setProduto] = useState({
+    produtoId: null,
+    produtoPreco: 0,
+    produtoNome: "",
+    produtoImg: "",
+    produtoEstoque: 0,
+  });
 
-  const { produtoId, produtoPreco, produtoNome, produtoImg, produtoEstoque } = route.params;
-
+  // useEffect para capturar os parâmetros da rota
+  
+  useEffect(() => {
+    if (route.params) {
+      const { produtoId, produtoPreco, produtoNome, produtoImg, produtoEstoque } = route.params;
+      setProduto({
+        produtoId,
+        produtoPreco,
+        produtoNome,
+        produtoImg,
+        produtoEstoque,
+      });
+    }
+  }, [route.params]);
 
   const { saldo, setSaldo } = useContext(WalletContext);
   const { Estoque } = useState(0);
   const { user } = useContext(AuthContext);
   const { ColocarNoHistorico } = useHistorico();
-  const { AdicionarAoCarrinho } = useContext(CarrinhoContext);
-  const { tema } = usarTheme();
   const [modalVisivel, setModalVisivel] = useState(false);
 
 
 
   const adicionarCarrinho = async () => {
     await chanceMostrarAnuncio();
+
+    const { produtoId, produtoNome, produtoPreco, produtoImg, produtoEstoque } = produto;
+
+    // Verifica se o produto já está no carrinho
+    const produtoNoCarrinho = carrinho.find((item) => item.id === produtoId);
+
+    // Verifica se a quantidade no carrinho já atingiu o estoque
+    if (produtoNoCarrinho && produtoNoCarrinho.quantidade >= produtoEstoque) {
+      console.log(`O produto ${produtoNome} já atingiu o limite do estoque.`);
+      setModalVisivel(true);
+      return;
+    }
+
+    // Adiciona ao carrinho se ainda houver estoque disponível
     if (produtoEstoque <= 0) {
       console.log(`O produto ${produtoNome} está sem estoque.`);
       setModalVisivel(true);
     } else {
-      // console.log("ADICIONAR AO CARRINHO ->", { produtoId, produtoNome, produtoPreco, produtoImg, produtoEstoque });
-      console.log(produtoEstoque)
       AdicionarAoCarrinho(produtoId, produtoNome, produtoPreco, produtoImg, produtoEstoque);
+      console.log(`Produto ${produtoNome} adicionado ao carrinho.`);
     }
   };
 
@@ -101,18 +135,18 @@ export default function CardProduto({ navigation }) {
 
       <Image
         style={styles.img}
-        source={{ uri: produtoImg }}
+        source={{ uri: produto.produtoImg }}
         resizeMode="cover"
       />
 
 
       <Text style={{ color: tema.texto, fontWeight: "bold", fontSize: 30 }}>
-        {produtoNome}
+        {produto.produtoNome}
       </Text>
 
 
       <Text style={[{ color: tema.textoAtivo, fontSize: 34 }, styles.texto]}>
-        R$ {produtoPreco.toFixed(2).replace(".", ",")}
+        R$ {produto.produtoPreco.toFixed(2).replace(".", ",")}
       </Text>
 
 
@@ -123,7 +157,7 @@ export default function CardProduto({ navigation }) {
         <Text
           style={[
             styles.saldoValor,
-            { color: produtoPreco > saldo ? "red" : tema.textoAtivo },
+            { color: produto.produtoPreco > saldo ? "red" : tema.textoAtivo },
           ]}
         >
           R$ {saldo.toFixed(2).replace(".", ",")}
@@ -143,7 +177,7 @@ export default function CardProduto({ navigation }) {
           styles.texto,
         ]}
       >
-        ID do produto: {produtoId}
+        ID do produto: {produto.produtoId}
       </Text>
 
 
@@ -166,14 +200,29 @@ export default function CardProduto({ navigation }) {
 
         <TouchableOpacity
           onPress={async () => {
-            await chanceMostrarAnuncio();
-            navigation.navigate("Pagamento", {
-              produtoId,
-              produtoNome,
-              produtoPreco,
-              produtoImg,
-              produtoEstoque,
-            })
+            const produtoNoCarrinho = carrinho.find((item) => item.id === produto.produtoId);
+
+            // Verifica se a quantidade no carrinho já atingiu o estoque
+            if (produtoNoCarrinho && produtoNoCarrinho.quantidade >= produto.produtoEstoque) {
+              console.log(`O produto ${produto.produtoNome} já atingiu o limite do estoque.`);
+              setModalVisivel(true);
+              return;
+            }else{
+
+            }
+            if (produto.produtoEstoque <= 0) {
+              console.log(`O produto ${produto.produtoNome} está sem estoque.`);
+              setModalVisivel(true);
+            } else {
+              await chanceMostrarAnuncio();
+              navigation.navigate("Pagamento", {
+                produtoId: produto.produtoId,
+                produtoNome: produto.produtoNome,
+                produtoPreco: produto.produtoPreco,
+                produtoImg: produto.produtoImg,
+                produtoEstoque: produto.produtoEstoque,
+              })
+            }
           }}
           style={[styles.btnAcao, styles.btnComprar]}
         >

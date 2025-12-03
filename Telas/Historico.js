@@ -80,7 +80,7 @@ export default function TelaHistorico() {
       ) : (
         <FlatList
           data={historico}
-          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+          keyExtractor={(item, index) => `${item.id}-${index}`}
           renderItem={renderHistoricoItem}
           showsVerticalScrollIndicator={false}
         />

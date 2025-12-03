@@ -8,9 +8,12 @@ import {
   StyleSheet,
   Dimensions,
   Alert,
+  Modal
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import Icon from "react-native-vector-icons/Entypo";
+import { useState } from "react";
 
 import { CarrinhoContext } from "../Context/CarrinhoContext";
 import { usarTheme } from "../Context/ThemeContext";
@@ -34,13 +37,20 @@ export default function Carrinho({ navigation }) {
   const quantidadeTotal = carrinho.reduce((acc, item) => acc + Number(item.quantidade || 0), 0);
   const placeholder = "https://i.imgur.com/3I6eQpA.png";
 
+  const [modalVisivel, setModalVisivel] = useState(false);
+
   const handleRemover = async (id) => {
     await chanceMostrarAnuncio();
     removerItem?.(id);
   };
 
-  const handleAumentar = (id) => {
-    aumentarQuantidade?.(id);
+  const handleAumentar = (id, produtoEstoque, quantidade) => {
+    if (produtoEstoque <= quantidade) {
+      setModalVisivel(true);
+    } else {
+      aumentarQuantidade?.(id);
+
+    }
   };
 
   const handleDiminuir = (id) => {
@@ -93,7 +103,7 @@ export default function Carrinho({ navigation }) {
 
               <Text style={[styles.qtd, { color: tema.texto }]}>{item.quantidade}</Text>
 
-              <TouchableOpacity onPress={() => handleAumentar(item.id)} style={[styles.qBtn, { borderColor: tema.borda }]}>
+              <TouchableOpacity onPress={() => handleAumentar(item.id, item.produtoEstoque, item.quantidade)} style={[styles.qBtn, { borderColor: tema.borda }]}>
                 <Feather name="plus" size={16} color={tema.texto} />
               </TouchableOpacity>
             </View>
@@ -144,7 +154,7 @@ export default function Carrinho({ navigation }) {
       ) : (
         <FlatList
           data={carrinho}
-          keyExtractor={(item, index) => (item.id ? String(item.id) : String(index))}
+          keyExtractor={(item, index) => `${item.id || index}`}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
@@ -173,6 +183,41 @@ export default function Carrinho({ navigation }) {
           </TouchableOpacity>
         </View>
       </View>
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={modalVisivel}
+        onRequestClose={() => setModalVisivel(false)}
+      >
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() => setModalVisivel(false)}
+        >
+          <View
+            style={{
+              width: 250,
+              backgroundColor: tema.background,
+              borderRadius: 15,
+              padding: 30,
+              alignItems: "center",
+              justifyContent: "center",
+              elevation: 5,
+              borderWidth: 2,
+              borderColor: tema.textoAtivo
+            }}
+          >
+            <Icon name="box" color={tema.iconEstoque} size={34} />
+            <Text style={{ fontSize: 18, marginBottom: 10, color: tema.texto, fontWeight: "bold" }}>
+              Em falta no estoque!
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
