@@ -32,8 +32,8 @@ export const CarrinhoProvider = ({ children }) => {
     carregarCarrinho();
   }, []);
 
-  // aceita chamada em duas formas:
-  // AdicionarAoCarrinho(obj)  OR  AdicionarAoCarrinho(id, nome, preco, produtoImg, descricao)
+  // aceita em duas formas:
+  // AdicionarAoCarrinho(obj)  ou  AdicionarAoCarrinho(id, nome, preco, produtoImg, descricao)
   const AdicionarAoCarrinho = (p1, p2, p3, p4, p5) => {
     let novoItem;
     if (typeof p1 === "object" && p1 !== null) {
@@ -55,7 +55,6 @@ export const CarrinhoProvider = ({ children }) => {
      
       };
     }
-    console.log("a", p1.produtoEstoque)
     if (novoItem.id === undefined) return;
 
     const existsIndex = carrinho.findIndex((it) => String(it.id) === String(novoItem.id));

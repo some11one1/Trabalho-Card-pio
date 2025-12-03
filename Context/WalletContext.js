@@ -19,6 +19,7 @@ export const WalletProvider = ({ children }) => {
 
         if (error) {
             console.log("Erro ao carregar saldo:", error);
+            console.log(saldo);
             return; // retorna 0 em caso de erro
             }
       setSaldo(data.saldo);

@@ -55,13 +55,12 @@ export default function Carrinho({ navigation }) {
         nome: item.nome,
         preco: item.preco,
         quantidade: item.quantidade,
-        estoque: item.produtoEstoque,
-        img: item.produtoImg,
+        produtoEstoque: item.produtoEstoque,
+        produtoImg: item.produtoImg,
       })),
       totalGeral,
-      qntd: quantidadeTotal
+      qndtd: quantidadeTotal
     });
-
   };
 
   const renderItem = ({ item }) => {
@@ -71,7 +70,6 @@ export default function Carrinho({ navigation }) {
         ? { uri: imageUri }
         : { uri: placeholder };
 
-        console.log("ITEM NO CARRINHO:", item);
 
 
     return (
