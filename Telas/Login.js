@@ -5,24 +5,30 @@ import {
   TextInput,
   Alert,
   StyleSheet,
+  ActivityIndicator,
   Image,
   TouchableOpacity,
 } from "react-native";
+import { useWindowDimensions } from "react-native";
 import { AuthContext } from "../Context/AuthContext";
 import React, { useContext, useState } from "react";
 import { Feather } from "@expo/vector-icons";
 import { supabase } from "../Supabase";
+import { usarTheme } from "../Context/ThemeContext";
+
+import { InputModerno } from "../Componentes/style/input";
 export default function Login() {
+
+  // documentação do diego se achar que é IA problema seu, achei melhor comentar pq vai ficar confuso
+
+  {/*Isso é apenas para pegar o tamanho das imagens*/ }
+  const { width, height } = useWindowDimensions();
+
   const { loginUser } = useContext(AuthContext);
   const [username, setUsername] = React.useState("");
   const [senha, setSenha] = React.useState("");
-
-  const [isSecure, setIsSecure] = useState(true);
-
-  // Função para alternar a visibilidade
-  const toggleVisibility = () => {
-    setIsSecure((prev) => !prev);
-  };
+  const { tema } = usarTheme();
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!username || !senha) {
@@ -63,32 +69,29 @@ export default function Login() {
         FEED
         <Text style={{ color: "#2D7BFF" }}>HUB</Text>
       </Text>
-      <TextInput
-        style={styles.inputname}
-        placeholder="Usuario"
-        value={username}
-        onChangeText={setUsername}
-        placeholderTextColor="#bbb"
-      />
-
-      <View style={styles.passwordContainer}>
-        <TextInput
-          style={styles.passwordInput}
-          placeholder="Senha"
+      <View style={{ width: "90%", marginTop: height * 0.03 }}>
+        <InputModerno
+          value={username}
+          onChangeText={setUsername}
+          placeholder="Seu username"
+        />
+        <InputModerno
           value={senha}
           onChangeText={setSenha}
-          secureTextEntry={isSecure}
-          placeholderTextColor="#bbb"
+          secure
         />
-        <TouchableOpacity onPress={toggleVisibility} style={styles.iconButton}>
-          <Feather
-            name={isSecure ? "eye-off" : "eye"}
-            size={22}
-            color="#ffffffff"
-          />
-        </TouchableOpacity>
+
+
       </View>
-      <TouchableOpacity style={styles.button_send} onPress={handleLogin}>
+      <TouchableOpacity style={{
+        width: width * 0.9,
+        backgroundColor: tema.textoAtivo,
+        paddingVertical: height * 0.02,
+        borderRadius: 12,
+        marginTop: height * 0.03,
+        alignItems: "center",
+        opacity: loading ? 0.7 : 1,
+      }} onPress={handleLogin}>
         <Text style={styles.text_white}>Logar</Text>
       </TouchableOpacity>
     </View>
@@ -104,7 +107,6 @@ const styles = StyleSheet.create({
   },
 
   inputname: {
-    width: "50%",
     backgroundColor: "#6e6e6eff",
     padding: 10,
     borderWidth: 1,
@@ -117,7 +119,6 @@ const styles = StyleSheet.create({
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-    width: "50%",
     backgroundColor: "#6e6e6eff",
     borderWidth: 1,
     borderRadius: 12,
