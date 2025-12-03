@@ -9,9 +9,9 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { AuthContext } from "../Context/AuthContext";
-
+import { supabase } from "../Supabase";
 export default function ConfigUsuarios() {
-  const { CriarUsuario, DeletarUsuario, ListarUsuarios, usuarios } =
+  const { CriarUsuario, TrocarEstadoUser, ListarUsuarios, usuarios } =
     useContext(AuthContext);
   const { tema, isModoEscuro } = usarTheme();
 
@@ -21,6 +21,25 @@ export default function ConfigUsuarios() {
 
   useEffect(() => {
     ListarUsuarios();
+
+    const canal = supabase
+      .channel("usuarios-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "usuarios",
+        },
+        (payload) => {
+          console.log(payload);
+          ListarUsuarios();
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(canal);
+    };
   }, []);
 
   const handleCriarUsuario = async () => {
@@ -95,13 +114,17 @@ export default function ConfigUsuarios() {
               style={[styles.usuarioItem, { borderColor: tema.textoAtivo }]}
             >
               <Text style={{ color: tema.texto }}>
-                {item.username} - {item.is_admin ? "Admin" : "User"}
+                {item.username} - {item.is_admin ? "Admin" : "User"} -{" "}
+                {item.ativo ? "Ativo" : "Desativado"}
               </Text>
               <TouchableOpacity
                 style={[styles.deletarButton, { borderColor: corDeletar }]}
-                onPress={() => DeletarUsuario(item.id)}
+                onPress={() => TrocarEstadoUser(item.id)}
               >
-                <Text style={{ color: corDeletar }}>Deletar</Text>
+                <Text style={{ color: corDeletar }}>
+                  {" "}
+                  {item.ativo ? "Desativar" : "Ativar"}
+                </Text>
               </TouchableOpacity>
             </View>
           )}
