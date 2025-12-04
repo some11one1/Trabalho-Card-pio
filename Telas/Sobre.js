@@ -32,14 +32,14 @@ export default function Sobre() {
       <View style={{
         backgroundColor: tema.background,
         width: widht_title,
-        height: 50,
+        height: 70,
         borderWidth: 5,
         borderColor: tema.borda,
         justifyContent: 'center',
-        paddingLeft: 10
+        padding: 10,
       }}>
         <Text style={{ color: tema.texto, fontSize: 17, fontWeight: 'bold' }}>
-          Designer
+          Diretor Geral De Estilização Estrutural e Arquitetura Visual
         </Text>
       </View>
       <Text style={estiloNome}>Diego</Text>
@@ -48,14 +48,14 @@ export default function Sobre() {
       <View style={{
         backgroundColor: tema.background,
         width: widht_title,
-        height: 50,
+        height: 70,
         borderWidth: 5,
         borderColor: tema.borda,
         justifyContent: 'center',
-        paddingLeft: 10
+        padding: 10,
       }}>
         <Text style={{ color: tema.texto, fontSize: 17, fontWeight: 'bold' }}>
-          Programador
+          Engenheiro Principal de Sistemas, Estrutura de código e automoção
         </Text>
       </View>
       <Text style={estiloNome}>Gustavo</Text>
@@ -64,14 +64,14 @@ export default function Sobre() {
       <View style={{
         backgroundColor: tema.background,
         width: widht_title,
-        height: 50,
+        height: 70,
         borderWidth: 5,
         borderColor: tema.borda,
         justifyContent: 'center',
-        paddingLeft: 10
+        padding: 10,
       }}>
         <Text style={{ color: tema.texto, fontSize: 17, fontWeight: 'bold' }}>
-          SQL DEV
+          Engenheiro Principal De Modelagem, Otimização e Infraestrutura De Dados
         </Text>
       </View>
       <Text style={estiloNome}>Luiz</Text>

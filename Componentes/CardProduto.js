@@ -62,6 +62,7 @@ export default function CardProduto({ navigation }) {
   const { user } = useContext(AuthContext);
   const { ColocarNoHistorico } = useHistorico();
   const [modalVisivel, setModalVisivel] = useState(false);
+  const [mensagemModal, setMensagemModal] = useState("");
 
 
 
@@ -76,6 +77,7 @@ export default function CardProduto({ navigation }) {
     // Verifica se a quantidade no carrinho já atingiu o estoque
     if (produtoNoCarrinho && produtoNoCarrinho.quantidade >= produtoEstoque) {
       console.log(`O produto ${produtoNome} já atingiu o limite do estoque.`);
+      setMensagemModal("Em falta no estoque!");
       setModalVisivel(true);
       return;
     }
@@ -83,10 +85,13 @@ export default function CardProduto({ navigation }) {
     // Adiciona ao carrinho se ainda houver estoque disponível
     if (produtoEstoque <= 0) {
       console.log(`O produto ${produtoNome} está sem estoque.`);
+      setMensagemModal("Em falta no estoque!");
       setModalVisivel(true);
     } else {
       AdicionarAoCarrinho(produtoId, produtoNome, produtoPreco, produtoImg, produtoEstoque);
       console.log(`Produto ${produtoNome} adicionado ao carrinho.`);
+      setMensagemModal("Produto adicionado ao carrinho!");
+      setModalVisivel(true);
     }
   };
 
@@ -262,7 +267,7 @@ export default function CardProduto({ navigation }) {
           >
             <Icon name="box" color={tema.iconEstoque} size={34} />
             <Text style={{ fontSize: 18, marginBottom: 10, color: tema.texto, fontWeight: "bold" }}>
-              Em falta no estoque!
+              {mensagemModal}
             </Text>
           </View>
         </TouchableOpacity>
