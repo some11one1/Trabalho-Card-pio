@@ -31,6 +31,7 @@ export default function Perfil() {
     setSaldoBanco,
     carregarSaldoBanco,
   } = useContext(WalletContext);
+
   const { user, atualizarUsuario } = useContext(AuthContext);
   const { ticket } = useTicket();
   const { tema } = usarTheme();
@@ -39,6 +40,7 @@ export default function Perfil() {
     carregarSaldo();
     carregarSaldoBanco();
   }, []);
+  
   const upload = async (file) => {
     try {
       let fileData;
