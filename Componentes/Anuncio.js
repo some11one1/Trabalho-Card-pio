@@ -9,7 +9,9 @@ import {
   Animated,
   Easing,
 } from "react-native";
+import { useWindowDimensions } from "react-native";
 import { usarTheme } from "../Context/ThemeContext";
+
 const anuncios = [
   {
     texto: "Contrata-se Jovem Programador",
@@ -51,6 +53,9 @@ export default function Anuncio({ visivel, onFechar }) {
   const [anuncio, setAnuncio] = useState(null);
   const [botaoLiberado, setBotaoLiberado] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
+
+  const { width, height } = useWindowDimensions();
+  
 
   useEffect(() => {
     if (visivel) {
@@ -104,7 +109,9 @@ export default function Anuncio({ visivel, onFechar }) {
           </TouchableOpacity>
 
           {/* Imagem e texto */}
-          <Image source={anuncio.imagem} style={styles.imagem} />
+          <Image
+          resizeMode="cover"
+          source={anuncio.imagem} style={[styles.imagem, {width: width * 0.7, height: height * 0.3, marginTop: height * 0.02}]} />
           <Text style={[styles.texto, { color: tema.texto }]}>
             {anuncio.texto}
           </Text>
@@ -147,8 +154,6 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   imagem: {
-    width: 300,
-    height: 400,
     borderRadius: 16,
     marginBottom: 15,
   },

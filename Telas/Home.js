@@ -1,3 +1,4 @@
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -5,61 +6,82 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  Dimensions,
+  useWindowDimensions,
+  TextInput,
+  ScrollView,
 } from "react-native";
+
 import { useAnuncio } from "../Context/AnuncioContext";
-import React, { useContext, useEffect } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { ProdutosContext } from "../Context/produtoContext";
-import Icon from "react-native-vector-icons/Entypo";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Nav_Menu from "../Componentes/nav_menu";
 import { supabase } from "../Supabase";
 
+export default function Home({ navigation }) {
+  const { width, height } = useWindowDimensions();
+  const numColumns = width < 380 ? 2 : 3;
+  const margin = width * 0.02;
+  const itemWidth = width / numColumns - margin * 2;
 
-const screenWidth = Dimensions.get("window").width;
-const numColumns = 3;
-const margin = 8;
-
-const itemWidth = screenWidth / numColumns - margin * 2;
-
-export default function Home({ navigation, route }) {
   const { chanceMostrarAnuncio } = useAnuncio();
   const { produtos, listarProdutos } = useContext(ProdutosContext);
   const { tema } = usarTheme();
 
- useEffect(() => {
-   listarProdutos();
+  const [busca, setBusca] = useState("");
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todos");
 
-  
-   const canal = supabase
-     .channel("produtos-changes")
-     .on(
-       "postgres_changes",
-       {
-         event: "*", 
-         schema: "public",
-         table: "produtos",
-       },
-       (payload) => {
-         console.log( payload);
-         listarProdutos(); 
-       }
-     )
-     .subscribe();
-   return () => {
-     supabase.removeChannel(canal);
-   };
- }, []);
+  const categorias = ["Todos", "comida", "Liquido", "Doce"];
+
+  useEffect(() => {
+    listarProdutos();
+
+    const canal = supabase
+      .channel("produtos-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "produtos",
+        },
+        () => {
+          listarProdutos();
+        }
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(canal);
+  }, []);
+
+  /** ✅ FILTRO OTIMIZADO */
+  const produtosFiltrados = useMemo(() => {
+    return produtos.filter((p) => {
+      if (!p.disponivel) return false;
+
+      const nomeOk = p.Nome
+        ?.toLowerCase()
+        .includes(busca.toLowerCase());
+
+      const categoriaOk =
+        categoriaSelecionada === "Todos"
+          ? true
+          : p.categorias === categoriaSelecionada;
+
+      return nomeOk && categoriaOk;
+    });
+  }, [produtos, busca, categoriaSelecionada]);
+
   const renderProduto = ({ item }) => (
     <TouchableOpacity
       style={[
         styles.produtoItem,
         {
           backgroundColor: tema.cardBackground,
-          margin: margin,
           width: itemWidth,
+          margin,
           borderColor: tema.borda,
+          height: height * 0.25,
         },
       ]}
       onPress={async () => {
@@ -74,47 +96,114 @@ export default function Home({ navigation, route }) {
       }}
     >
       <Image
-        style={styles.produtoImage}
         source={{ uri: item.img }}
-        resizeMode="cover"
+        resizeMode="contain"
+        style={[
+          styles.produtoImage,
+          {
+            height: height * 0.1,
+          },
+        ]}
       />
 
       <View style={styles.produtoInfo}>
         <Text
           numberOfLines={2}
-          style={[styles.produtoNome, { color: tema.texto }]}
+          style={[
+            styles.produtoNome,
+            { color: tema.texto, fontSize: width * 0.032 },
+          ]}
         >
           {item.Nome}
         </Text>
-        <Text style={[styles.produtoValor, { color: tema.textoAtivo }]}>
+
+        <Text
+          style={[
+            styles.produtoValor,
+            { color: tema.textoAtivo },
+          ]}
+        >
           R$ {item.Valor.toFixed(2).replace(".", ",")}
         </Text>
       </View>
     </TouchableOpacity>
   );
-const filtroProdutoDisponivel = produtos.filter((produto) => produto.disponivel);
+
   return (
     <SafeAreaView
-      style={[styles.containerPrincipal, { backgroundColor: tema.background }]}
+      edges={["top"]}
+      style={[
+        styles.containerPrincipal,
+        { backgroundColor: tema.background },
+      ]}
     >
       <Nav_Menu />
 
+
+      <View style={styles.buscaContainer}>
+        <TextInput
+          placeholder="Buscar produtos..."
+          placeholderTextColor={`${tema.texto}99`}
+          value={busca}
+          onChangeText={setBusca}
+          style={[
+            styles.inputBusca,
+            {
+              backgroundColor: tema.cardBackground,
+              color: tema.texto,
+            },
+          ]}
+        />
+
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoriasContainer}
+        >
+          {categorias.map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              onPress={() => setCategoriaSelecionada(cat)}
+              style={[
+                styles.categoriaChip,
+                {
+                  backgroundColor:
+                    categoriaSelecionada === cat
+                      ? tema.textoAtivo
+                      : tema.cardBackground,
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  color:
+                    categoriaSelecionada === cat
+                      ? "#fff"
+                      : tema.texto,
+                  fontWeight: "600",
+                }}
+              >
+                {cat}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+
       <FlatList
-        data={filtroProdutoDisponivel}
+        data={produtosFiltrados}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderProduto}
-        contentContainerStyle={styles.listaContainer}
         numColumns={numColumns}
+        contentContainerStyle={styles.listaContainer}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={() => (
           <View style={styles.vazioContainer}>
             <Text style={{ color: tema.texto }}>
               Nenhum produto encontrado.
             </Text>
-            <TouchableOpacity onPress={listarProdutos}>
-              <Text style={{ color: tema.textoAtivo, marginTop: 10 }}>
-                Tentar Recarregar
-              </Text>
-            </TouchableOpacity>
           </View>
         )}
       />
@@ -127,46 +216,63 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  buscaContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+
+  inputBusca: {
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+
+  categoriasContainer: {
+    marginTop: 10,
+  },
+
+  categoriaChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
+  },
+
   listaContainer: {
-    paddingHorizontal: margin,
     alignItems: "center",
+    paddingVertical: 10,
     flexGrow: 1,
   },
 
   produtoItem: {
-    height: 180,
-
-    borderRadius: 8,
-    borderWidth: 1,
-
-    padding: 5,
     alignItems: "center",
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 8,
   },
+
   produtoImage: {
     width: "90%",
-    height: 80,
-    borderRadius: 6,
-    marginBottom: 5,
+    marginBottom: 6,
   },
 
   produtoInfo: {
-    width: "100%",
-    paddingHorizontal: 3,
-    paddingBottom: 5,
-    justifyContent: "flex-start",
+    alignItems: "center",
   },
+
   produtoNome: {
-    fontSize: 12,
     fontWeight: "bold",
     textAlign: "center",
-    height: 30,
+    height: 36,
   },
+
   produtoValor: {
-    fontSize: 14,
     fontWeight: "700",
-    textAlign: "center",
     marginTop: 4,
   },
+
   vazioContainer: {
     alignItems: "center",
     padding: 20,

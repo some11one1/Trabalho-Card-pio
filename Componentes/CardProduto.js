@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Dimensions,
   Modal
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,16 +18,16 @@ import { AuthContext } from "../Context/AuthContext";
 import { CarrinhoContext } from "../Context/CarrinhoContext";
 import { useHistorico } from "../Context/HistoricoContext";
 import { usarTheme } from "../Context/ThemeContext";
+import { useWindowDimensions } from "react-native";
 
 import { supabase } from "../Supabase";
 
-const { width } = Dimensions.get("window");
-
 export default function CardProduto({ navigation }) {
 
+  const { width, height } = useWindowDimensions();
 
   const { chanceMostrarAnuncio } = useAnuncio()
-  
+
   const route = useRoute();
   const { carrinho, AdicionarAoCarrinho } = useContext(CarrinhoContext);
   const { tema } = usarTheme();
@@ -43,7 +42,7 @@ export default function CardProduto({ navigation }) {
   });
 
   // useEffect para capturar os parâmetros da rota
-  
+
   useEffect(() => {
     if (route.params) {
       const { produtoId, produtoPreco, produtoNome, produtoImg, produtoEstoque } = route.params;
@@ -106,8 +105,8 @@ export default function CardProduto({ navigation }) {
 
       <View
         style={{
-          width: "100%",
-          height: 60,
+          width: width * 1,
+          height: height * 0.08,
           backgroundColor: tema.background,
           alignItems: "center",
           justifyContent: "space-between",
@@ -119,50 +118,70 @@ export default function CardProduto({ navigation }) {
           await chanceMostrarAnuncio();
           navigation.goBack()
         }}>
-          <Icon name="chevron-left" color={tema.texto} size={34} />
+          <Icon name="chevron-left" color={tema.texto} size={width * 0.09} />
         </TouchableOpacity>
 
-        <View style={styles.container_img}>
-          <Text style={{ color: "#ffffff", fontWeight: "bold", fontSize: 22 }}>
+        <View style={[styles.container_img, { width: width * 0.24 }]}>
+          <Text
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            style={{ color: "#ffffff", fontWeight: "bold", fontSize: width * 0.2, maxWidth: width * 0.2 }}
+          >
             FEED
             <Text style={{ color: "#2D7BFF" }}>HUB</Text>
           </Text>
           <Image
             source={require("../assets/logo.png")}
-            style={styles.logo}
+            style={{ width: width * 0.1, height: height * 0.04 }}
             resizeMode="contain"
           />
         </View>
 
-        <View style={{ width: 35 }} />
+        <View style={{ width: width * 0.08 }} />
       </View>
 
 
       <Image
-        style={styles.img}
+        style={[styles.img, {
+          width: width * 0.8,
+          height: width * 0.6,
+        }]}
         source={{ uri: produto.produtoImg }}
         resizeMode="cover"
       />
 
 
-      <Text style={{ color: tema.texto, fontWeight: "bold", fontSize: 30 }}>
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        style={{ color: tema.texto, fontWeight: "bold", fontSize: width * 0.08, marginBottom: 10, maxWidth: width * 0.85 }}
+      >
         {produto.produtoNome}
       </Text>
 
 
-      <Text style={[{ color: tema.textoAtivo, fontSize: 34 }, styles.texto]}>
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        style={[{ color: tema.textoAtivo, fontSize: width * 0.09, maxWidth: width * 0.85 }, styles.texto]}
+      >
         R$ {produto.produtoPreco.toFixed(2).replace(".", ",")}
       </Text>
 
 
       <View style={styles.saldoContainer}>
-        <Text style={[styles.saldoLabel, { color: tema.texto }]}>
+        <Text
+          numberOfLines={1}
+          style={[styles.saldoLabel, { color: tema.texto, fontSize: width * 0.05, maxWidth: width * 0.3 }]}
+        >
           Seu saldo:
         </Text>
         <Text
+          numberOfLines={1}
+          adjustsFontSizeToFit
           style={[
             styles.saldoValor,
-            { color: produto.produtoPreco > saldo ? "red" : tema.textoAtivo },
+            { color: produto.produtoPreco > saldo ? "red" : tema.textoAtivo, fontSize: width * 0.05, maxWidth: width * 0.35 },
           ]}
         >
           R$ {saldo.toFixed(2).replace(".", ",")}
@@ -171,13 +190,16 @@ export default function CardProduto({ navigation }) {
 
 
       <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
         style={[
           {
             color: tema.texto,
-            top: "85%",
+            top: width * 1.7,
             position: "absolute",
-            fontSize: 10,
+            fontSize: width * 0.03,
             fontWeight: "100",
+            maxWidth: width * 0.8,
           },
           styles.texto,
         ]}
@@ -186,18 +208,21 @@ export default function CardProduto({ navigation }) {
       </Text>
 
 
-      <View style={[styles.footerAcoes, { backgroundColor: tema.background }]}>
+      <View style={[styles.footerAcoes, { backgroundColor: tema.background, width: width * 1, }]}>
 
         <TouchableOpacity
           onPress={adicionarCarrinho}
           style={[
             styles.btnAcao,
             styles.btnCarrinho,
-            { borderColor: tema.textoAtivo },
+            { borderColor: tema.textoAtivo, height: height * 0.08, },
           ]}
         >
-          <Icon name="shopping-basket" color={tema.textoAtivo} size={25} />
-          <Text style={[styles.btnTexto, { color: tema.textoAtivo }]}>
+          <Icon name="shopping-basket" color={tema.textoAtivo} size={width * 0.08} />
+          <Text
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            style={[styles.btnTexto, { color: tema.textoAtivo, fontSize: width * 0.2, maxWidth: width * 0.3 }]}>
             Adicionar
           </Text>
         </TouchableOpacity>
@@ -212,7 +237,7 @@ export default function CardProduto({ navigation }) {
               console.log(`O produto ${produto.produtoNome} já atingiu o limite do estoque.`);
               setModalVisivel(true);
               return;
-            }else{
+            } else {
 
             }
             if (produto.produtoEstoque <= 0) {
@@ -229,10 +254,13 @@ export default function CardProduto({ navigation }) {
               })
             }
           }}
-          style={[styles.btnAcao, styles.btnComprar]}
+          style={[styles.btnAcao, styles.btnComprar, { height: height * 0.08 }]}
         >
-          <Icon name="credit-card" color="#FFFFFF" size={25} />
-          <Text style={[styles.btnTexto, { color: "#FFFFFF" }]}>
+          <Icon name="credit-card" color="#FFFFFF" size={width * 0.08} />
+          <Text
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            style={[styles.btnTexto, { color: "#FFFFFF", fontSize: width * 0.05, maxWidth: width * 0.3 }]}>
             Comprar Agora
           </Text>
         </TouchableOpacity>
@@ -254,7 +282,7 @@ export default function CardProduto({ navigation }) {
         >
           <View
             style={{
-              width: 250,
+              width: width * 0.8,
               backgroundColor: tema.background,
               borderRadius: 15,
               padding: 30,
@@ -265,8 +293,11 @@ export default function CardProduto({ navigation }) {
               borderColor: tema.textoAtivo
             }}
           >
-            <Icon name="box" color={tema.iconEstoque} size={34} />
-            <Text style={{ fontSize: 18, marginBottom: 10, color: tema.texto, fontWeight: "bold" }}>
+            <Icon name="box" color={tema.iconEstoque} size={width * 0.09} />
+            <Text
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={{ fontSize: width * 0.06, marginBottom: 10, color: tema.texto, fontWeight: "bold", maxWidth: width * 0.8 }}>
               {mensagemModal}
             </Text>
           </View>
@@ -284,18 +315,10 @@ const styles = StyleSheet.create({
   container_img: {
     flexDirection: "row",
     alignItems: "center",
-    width: 150,
     marginRight: 20,
   },
 
-  logo: {
-    width: "30%",
-    height: 30,
-  },
-
   img: {
-    width: width * 0.8,
-    height: width * 0.6,
     borderRadius: 16,
     marginBottom: 20,
     marginTop: 15,
@@ -316,12 +339,10 @@ const styles = StyleSheet.create({
   },
 
   saldoLabel: {
-    fontSize: 16,
     marginRight: 8,
   },
 
   saldoValor: {
-    fontSize: 16,
     fontWeight: "bold",
   },
 
@@ -331,12 +352,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#33333333",
     justifyContent: "space-between",
-    width: "100%",
     marginTop: "auto",
   },
 
   btnAcao: {
-    height: 55,
     borderRadius: 12,
     flexDirection: "row",
     justifyContent: "center",
@@ -361,7 +380,6 @@ const styles = StyleSheet.create({
   },
 
   btnTexto: {
-    fontSize: 18,
     fontWeight: "bold",
     marginLeft: 8,
   },

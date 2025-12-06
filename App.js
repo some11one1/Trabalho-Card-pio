@@ -20,8 +20,8 @@ import Sobre from "./Telas/Sobre";
 import Configuracoes from "./Telas/Configuracoes";
 import { FontAwesome } from "@expo/vector-icons";
 import Ticket from "./Telas/Ticket";
-import { useContext } from "react";
-import { Alert, Platform } from "react-native";
+import { useContext, useState } from "react";
+import { View, Text, Modal, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from "react-native";
 import { ProdutosProvider } from "./Context/produtoContext";
 import { Button } from "react-native-web";
 import { WalletContext, WalletProvider } from "./Context/WalletContext";
@@ -64,7 +64,7 @@ export const UserTabs = () => {
         tabBarStyle: {
           backgroundColor: tema.background,
           borderTopWidth: 0,
-          elevation: 0,
+          elevation: -5,
           paddingBottom: insets.bottom + 6,
           height: 60 + insets.bottom,
         },
@@ -75,6 +75,7 @@ export const UserTabs = () => {
           fontSize: 12,
           fontWeight: "bold",
         },
+        
       }}
     >
       <Tab.Screen
@@ -170,94 +171,186 @@ const Drawer = createDrawerNavigator(); // mesmo que o tab, só que pro drawer (
 // função que retorna o drawer, que vai ter as tabs dentro e diferente se for admin ou user
 // pega o estado do usuario do AuthContext para saber se é adz  min ou user
 // define quais serão as TABS (linha 28) baseado se o usuario é admin ou não | o user? vê se o user existe, server pra nao dar erro caso ele naoe exista
+
+const stylesModal = StyleSheet.create({
+
+
+
+  buttonContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 10,
+  },
+});
+
 const HomeDrawer = () => {
   const { tema } = usarTheme();
   const { user, logout } = useContext(AuthContext);
+  const [modalLogoutVisivel, setModalLogoutVisivel] = useState(false);
+  const { width, height } = useWindowDimensions();
 
   const confirmarLogout = () => {
-    if (Platform.OS === "web") {
-      // se estiver rodando na web vai só mandar o prompt básico pra deslogar
-      const confirmar = window.confirm("Você tem certeza que quer DesLogar?");
-      if (confirmar) {
-        logout();
-      }
-      return;
-    } else {
-      // função que confirma se o usuario quer deslogar
-      Alert.alert("Deslogar", "Você tem certeza que quer DesLogar?", [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Sim", onPress: () => logout() },
-      ]);
-    }
+    setModalLogoutVisivel(true);
   };
+
+  const handleLogout = () => {
+    setModalLogoutVisivel(false);
+    logout();
+  };
+
   function FuncaoInutilSoPraResolverUmErroDaTelaDeSair() {
+    // 3. O componente é agora onde o Modal será renderizado
     return null;
   }
   return (
-    <Drawer.Navigator
-      screenOptions={() => ({
-        headerStyle: { backgroundColor: tema.background }, // muda a cor do header conforme o tema
-        headerTintColor: tema.texto, // muda a cor do texto do header conforme o tema
-        drawerStyle: {
-          // muda a cor do drawer conforme o tema
-          backgroundColor: tema.background,
-        },
-        drawerActiveTintColor: tema.textoAtivo, // muda a cor do texto ativo (ativo = quando selecionado) do drawer conforme o tema
-        drawerInactiveTintColor: tema.texto, // muda a cor do texto inativo (inativo = quando nao selecionado) do drawer conforme o tema
-      })}
-    >
-      <Drawer.Screen
-        name="Home"
-        component={user?.role === "admin" ? AdminTabs : UserTabs}
-        options={() => ({
-          headerShown: false,
-        })}
-      />
-      {user?.role !== "admin" && (
-        <Drawer.Screen
-          name="Ticket"
-          component={Ticket}
-          options={{ headerShown: false }}
-        />
-      )}
-      <Drawer.Screen
-        name="Perfil"
-        component={Perfil}
-        options={() => ({
-          headerShown: false,
-        })}
-      />
-      <Drawer.Screen
-        name="Chat"
-        component={Chat}
-        options={{
-          headerShown: true,
-          title: "Chat Global",
-        }}
-      />
-      <Drawer.Screen
-        name="Sobre"
-        component={Sobre}
-        options={() => ({
-          headerShown: false,
-        })}
-      />
-
-      <Drawer.Screen
-        name="sair"
-        component={FuncaoInutilSoPraResolverUmErroDaTelaDeSair} //componente nulo pq n tem tela pro logout
-        options={{
-          drawerLabel: "Sair", //nome que aparece no drawer
-        }}
-        listeners={{
-          drawerItemPress: (e) => {
-            //quando clicar no item do drawer
-            e.preventDefault(); //impede a navegação padrão
-            confirmarLogout();
+    <>
+      <Drawer.Navigator
+        screenOptions={() => ({
+          headerStyle: { backgroundColor: tema.background }, // muda a cor do header conforme o tema
+          headerTintColor: tema.texto, // muda a cor do texto do header conforme o tema
+          drawerStyle: {
+            // muda a cor do drawer conforme o tema
+            backgroundColor: tema.background,
           },
-        }}
-      />
-    </Drawer.Navigator>
+          drawerActiveTintColor: tema.textoAtivo, // muda a cor do texto ativo (ativo = quando selecionado) do drawer conforme o tema
+          drawerInactiveTintColor: tema.texto, // muda a cor do texto inativo (inativo = quando nao selecionado) do drawer conforme o tema
+        })}
+      >
+        <Drawer.Screen
+          name="Home"
+          component={user?.role === "admin" ? AdminTabs : UserTabs}
+          options={() => ({
+            headerShown: false,
+          })}
+        />
+        {user?.role !== "admin" && (
+          <Drawer.Screen
+            name="Ticket"
+            component={Ticket}
+            options={{ headerShown: false }}
+          />
+        )}
+        <Drawer.Screen
+          name="Perfil"
+          component={Perfil}
+          options={() => ({
+            headerShown: false,
+          })}
+        />
+        <Drawer.Screen
+          name="Chat"
+          component={Chat}
+          options={{
+            headerShown: true,
+            title: "Chat Global",
+          }}
+        />
+        <Drawer.Screen
+          name="Sobre"
+          component={Sobre}
+          options={() => ({
+            headerShown: false,
+          })}
+        />
+
+        <Drawer.Screen
+          name="sair"
+          component={FuncaoInutilSoPraResolverUmErroDaTelaDeSair} //componente nulo pq n tem tela pro logout
+          options={{
+            drawerLabel: "Sair", //nome que aparece no drawer
+          }}
+          listeners={{
+            drawerItemPress: (e) => {
+              //quando clicar no item do drawer
+              e.preventDefault(); //impede a navegação padrão
+              confirmarLogout();
+            },
+          }}
+        />
+
+
+      </Drawer.Navigator>
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={modalLogoutVisivel}
+        onRequestClose={() => setModalLogoutVisivel(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}>
+          <View
+            style={{
+              width: width * 0.8,
+              backgroundColor: tema.background,
+              borderRadius: 15,
+              padding: 30,
+              alignItems: "center",
+              justifyContent: "center",
+              elevation: 5,
+              borderWidth: 2,
+              borderColor: tema.textoAtivo
+            }}>
+            <Text
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={{ fontSize: width * 0.06, marginBottom: 10, color: tema.texto, fontWeight: "bold", maxWidth: width * 0.8 }}>
+              Deslogar
+            </Text>
+            <Text
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={{ fontSize: width * 0.03, marginBottom: 10, color: tema.texto, fontWeight: "bold", maxWidth: width * 0.8 }}>Você tem certeza que quer Deslogar?</Text>
+
+            <View style={[stylesModal.buttonContainer, { width: width * 0.5 }]}>
+              <TouchableOpacity
+                style={{
+                  width: width * 0.2,
+                  backgroundColor: tema.cardBackground,
+                  borderColor: tema.textoAtivo,
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  padding: width * 0.03,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onPress={() => setModalLogoutVisivel(false)}
+              >
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  style={{ fontSize: width * 0.09, color: tema.texto, fontWeight: "bold", maxWidth: width * 0.15 }}>Não</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  width: width * 0.2,
+                  backgroundColor: tema.cardBackground,
+                  borderColor: tema.textoAtivo,
+                  borderWidth: 1,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: width * 0.03,
+                }}
+                onPress={handleLogout}
+              >
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  style={{ fontSize: width * 0.09, color: tema.texto, fontWeight: "bold", maxWidth: width * 0.15 }}>Sim</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 };
 

@@ -20,8 +20,9 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "package": "com.some1one1.projeto"
+      "edgeToEdgeEnabled": false,
+      "package": "com.some1one1.projeto",
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "favicon": "./assets/icon.png"

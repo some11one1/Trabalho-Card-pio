@@ -8,6 +8,7 @@ import {
   Platform,
   TouchableOpacity,
   Modal,
+  useWindowDimensions,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,6 +23,7 @@ import { useTicket } from "../Context/TicketContext";
 export default function Perfil() {
   const { chanceMostrarAnuncio } = useAnuncio();
   const [modalVisivel, setModalVisivel] = useState(false);
+  const { width, height } = useWindowDimensions();
 
   const {
     saldo,
@@ -40,7 +42,7 @@ export default function Perfil() {
     carregarSaldo();
     carregarSaldoBanco();
   }, []);
-  
+
   const upload = async (file) => {
     try {
       let fileData;
@@ -160,12 +162,12 @@ export default function Perfil() {
       <View style={{ flex: 0 }}>
         <View
           style={{
+            width: width * 1,
             flexDirection: "row",
             alignItems: "center",
             marginBottom: 20,
-          }}
-        >
-          <TouchableOpacity onPress={trocarFoto}>
+          }}>
+          <TouchableOpacity onPress={trocarFoto} style={{ width: width * 0.4, alignItems: "center", padding: 10 }}>
             <Image
               source={{
                 uri:
@@ -173,34 +175,53 @@ export default function Perfil() {
                   "https://i.pinimg.com/474x/73/14/cc/7314cc1a88bf3cdc48347ab186e12e81.jpg",
               }}
               style={{
-                width: 120,
-                height: 120,
+                width: width * 0.35,
+                height: width * 0.35,
                 borderRadius: 60,
                 borderWidth: 2,
                 borderColor: tema.textoAtivo,
-                marginRight: 20,
+                marginRight: width * 0.03,
               }}
             />
           </TouchableOpacity>
 
           <View>
             <Text
-              style={{ color: tema.texto, fontSize: 34, fontWeight: "bold" }}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={{ color: tema.texto, fontSize: width * 0.05, fontWeight: "bold", maxWidth: width * 0.5 }}
             >
-              Olá, {user.username}
+              {
+                user.username == 'Orelliara' ? '✩.⋆. 𝒪𝑟𝑒𝑙𝑙𝑖𝑎𝑟𝑎.˳⁺୨୧˚⋆' : `Olá, ${user.username}`
+              }
             </Text>
 
             {user?.is_admin ? (
-              <Text style={{ color: "tema.texto", fontSize: 25 }}>
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                style={{ color: tema.textoAtivo, fontSize: width * 0.05, fontWeight: "bold", maxWidth: width * 0.5 }}>
                 Administrador
               </Text>
             ) : (
               <>
-                <Text style={{ color: tema.texto, fontSize: 25 }}>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  style={{ color: tema.textoAtivo, fontSize: width * 0.05, fontWeight: "bold", maxWidth: width * 0.5 }}>
+                  Estudante
+                </Text>
+                <Text
+                  umberOfLines={1}
+                  adjustsFontSizeToFit
+                  style={{ color: tema.texto, fontSize: width * 0.05, fontWeight: "bold", maxWidth: width * 0.5 }}>
                   Saldo: R$ {saldo}
                 </Text>
 
-                <Text style={{ color: tema.texto, fontSize: 25 }}>
+                <Text
+                  umberOfLines={1}
+                  adjustsFontSizeToFit
+                  style={{ color: tema.texto, fontSize: width * 0.05, maxWidth: width * 0.5 }}>
                   {ticket ? "Ticket Disponível" : "Ticket Indisponível"}
                 </Text>
               </>
@@ -213,17 +234,20 @@ export default function Perfil() {
         onPress={() => setModalVisivel(true)}
         style={{
           position: "absolute",
-          bottom: 60,
+          bottom: height * 0.15,
           alignSelf: "center",
-          backgroundColor: tema.cardBackground,
-          paddingVertical: 12,
-          paddingHorizontal: 20,
+          backgroundColor: tema.background,
+          paddingVertical: width * 0.03,
+          paddingHorizontal: width * 0.1,
           borderWidth: 2,
           borderRadius: 10,
           borderColor: tema.texto,
         }}
       >
-        <Text style={{ fontSize: 22, fontWeight: "600", color: tema.texto }}>
+        <Text
+          umberOfLines={1}
+          adjustsFontSizeToFit
+          style={{ fontSize: width * 0.05, fontWeight: "600", color: tema.texto, maxWidth: width * 0.5 }}>
           Recarregar
         </Text>
       </TouchableOpacity>
@@ -244,32 +268,52 @@ export default function Perfil() {
         >
           <View
             style={{
-              width: 250,
-              backgroundColor: "white",
+              width: width * 0.8,
+              backgroundColor: tema.background,
               borderRadius: 15,
-              padding: 20,
+              padding: 30,
               alignItems: "center",
               justifyContent: "center",
               elevation: 5,
+              borderWidth: 2,
+              borderColor: tema.textoAtivo
             }}
           >
-            <Text style={{ fontSize: 18, marginBottom: 10 }}>
+            <Text
+              umberOfLines={1}
+              adjustsFontSizeToFit
+              style={{ fontSize: width * 0.05, marginBottom: 10, color: tema.texto, fontWeight: "bold", maxWidth: width * 0.6 }}>
               Recarregar Saldo
             </Text>
 
             <View
               style={{
+                width: width * 0.6,
                 flexDirection: "row",
                 flexWrap: "wrap",
                 justifyContent: "center",
               }}
             >
               {["10", "25", "50", "100"].map((v) => (
-                <View key={v} style={{ margin: 5 }}>
-                  <Button
-                    title={`R$${v}`}
+                <View key={v} style={{ margin: 5, width: width * 0.25 }}>
+                  <TouchableOpacity
                     onPress={() => confirmarRecarga(Number(v))}
-                  />
+                    style={{
+                      backgroundColor: tema.cardBackground,
+                      borderColor: tema.textoAtivo,
+                      borderWidth: 1,
+                      borderRadius: 10,
+                      paddingVertical: width * 0.03,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      umberOfLines={1}
+                      adjustsFontSizeToFit
+                      style={{ fontSize: width * 0.05, color: tema.texto, fontWeight: "600", maxWidth: width * 0.2 }}>
+                      R$ {v}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ))}
             </View>

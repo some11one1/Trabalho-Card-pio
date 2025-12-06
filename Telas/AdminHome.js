@@ -10,6 +10,7 @@ import {
   Button,
   Alert,
   TextInput,
+  useWindowDimensions
 } from "react-native";
 import { supabase } from "../Supabase";
 import { AuthContext } from "../Context/AuthContext";
@@ -22,11 +23,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Nav_Menu from "../Componentes/nav_menu";
 
 import { useHistorico } from "../Context/HistoricoContext";
-const screenWidth = Dimensions.get("window").width;
-const numColumns = 3;
-const margin = 8;
 
-const itemWidth = screenWidth / numColumns - margin * 2;
+
 
 export default function AdminHome({ navigation, route }) {
   const [novoDisponivel, setNovoDisponivel] = useState(true);
@@ -38,6 +36,12 @@ export default function AdminHome({ navigation, route }) {
   const { produtos, listarProdutos } = useContext(ProdutosContext);
   const [novoValor, setNovoValor] = useState("");
   const { tema } = usarTheme();
+
+  const { width, height } = useWindowDimensions();
+
+  const numColumns = width < 380 ? 2 : 3;
+  const margin = width * 0.02;
+  const itemWidth = width / numColumns - margin * 2;
 
   useEffect(() => {
     listarProdutos();
@@ -68,9 +72,11 @@ export default function AdminHome({ navigation, route }) {
         styles.produtoItem,
         {
           backgroundColor: tema.cardBackground,
-          margin: margin,
           width: itemWidth,
+          margin,
           borderColor: tema.borda,
+          padding: width * 0.02,
+          height: height * 0.25,
         },
       ]}
       onPress={() => {
@@ -81,19 +87,37 @@ export default function AdminHome({ navigation, route }) {
       }}
     >
       <Image
-        style={styles.produtoImage}
+        style={[
+          styles.produtoImage,
+          {
+            height: height * 0.10,
+            borderRadius: width * 0.02,
+          },
+        ]}
         source={{ uri: item.img }}
-        resizeMode="cover"
+        resizeMode="contain"
       />
 
       <View style={styles.produtoInfo}>
         <Text
           numberOfLines={2}
-          style={[styles.produtoNome, { color: tema.texto }]}
+          style={[
+            styles.produtoNome,
+            {
+              color: tema.texto,
+              fontSize: width * 0.032,
+            },
+          ]}
         >
           {item.Nome}
         </Text>
-        <Text style={[styles.produtoValor, { color: tema.textoAtivo }]}>
+        <Text style={[
+          styles.produtoEditor,
+          {
+            color: tema.textoAtivo,
+            fontSize: width * 0.035,
+          },
+        ]}>
           Editar Produto
         </Text>
       </View>
@@ -260,19 +284,15 @@ const styles = StyleSheet.create({
   },
 
   listaContainer: {
-    paddingHorizontal: margin,
     alignItems: "center",
     flexGrow: 1,
   },
 
   produtoItem: {
-    height: 180,
-
-    borderRadius: 8,
-    borderWidth: 1,
-
-    padding: 5,
+    justifyContent: "flex-start",
     alignItems: "center",
+    borderRadius: 10,
+    borderWidth: 1,
   },
   produtoImage: {
     width: "90%",
@@ -283,20 +303,16 @@ const styles = StyleSheet.create({
 
   produtoInfo: {
     width: "100%",
-    paddingHorizontal: 3,
-    paddingBottom: 5,
-    justifyContent: "flex-start",
+    paddingHorizontal: 4,
+    alignItems: "center",
   },
   produtoNome: {
-    fontSize: 12,
     fontWeight: "bold",
     textAlign: "center",
-    height: 30,
+    height: 35,
   },
-  produtoValor: {
-    fontSize: 14,
+  produtoEditor: {
     fontWeight: "700",
-    textAlign: "center",
     marginTop: 4,
   },
   vazioContainer: {

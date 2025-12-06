@@ -12,11 +12,12 @@ import {
   Modal,
   Image,
   TouchableOpacity,
+  Animated,
 } from "react-native";
 import { useWindowDimensions } from "react-native";
 import { AuthContext } from "../Context/AuthContext";
 import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Feather } from "@expo/vector-icons";
 import { supabase } from "../Supabase";
 import { usarTheme } from "../Context/ThemeContext";
@@ -40,32 +41,57 @@ export default function Login() {
   const [iconModal, setIconModal] = useState("info");
   const [avisoModal, setAvisoModal] = useState("");
 
+  const spinAnim = React.useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (loading) {
+      Animated.loop(
+        Animated.timing(spinAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        })
+      ).start();
+    } else {
+      spinAnim.setValue(0);
+    }
+  }, [loading]);
+
+  const spin = spinAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
   const handleLogin = async () => {
-    if (!username || !senha) {
-      setAvisoModal("um dos campos está vazio.");
+    if (!username.trim() || !senha.trim()) {
+      setAvisoModal("Preencha usuário e senha");
+      setIconModal("alert");
       setModalVisivel(true);
       return;
     }
 
     setLoading(true);
 
-    const resultado = await loginUser(username, senha);
-    setLoading(false);
+    try {
+      const result = await loginUser(username.trim(), senha);
 
-    if (resultado === false) {
-      // usuário não existe ou senha errada
-      setAvisoModal("Usuário ou senha incorretos.");
-      setIconModal("x-circle");
+      if (result?.success) {
+        setModalVisivel(true);
+        setTimeout(() => {
+          navigation.replace("AppTabs", { screen: "Home" });
+        }, 500);
+      } else {
+        setAvisoModal(result?.error || "Erro ao realizar login.");
+        setIconModal("alert");
+        setModalVisivel(true);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setAvisoModal("Erro inesperado ao tentar logar.");
+      setIconModal("alert");
       setModalVisivel(true);
-      return;
-    }
-
-    if (resultado && resultado.error) {
-      // usuário existe mas está desativado
-      setAvisoModal("Acesso negado: " + resultado.error);
-      setIconModal("x-circle");
-      setModalVisivel(true);
-      return;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -127,25 +153,28 @@ export default function Login() {
               value={username}
               onChangeText={setUsername}
               placeholder="Seu username"
-            />
+              />
             <InputModerno
               value={senha}
               onChangeText={setSenha}
+              placeholder="Sua senha"
               secure
             />
 
 
           </View>
-          <TouchableOpacity style={{
-            width: width * 0.9,
-            backgroundColor: tema.textoAtivo,
-            paddingVertical: height * 0.02,
-            borderRadius: 12,
-            marginTop: height * 0.03,
-            alignItems: "center",
-            opacity: loading ? 0.7 : 1,
-          }} onPress={handleLogin}>
-            <Text style={styles.text_white}>Logar</Text>
+          <TouchableOpacity 
+            style={[styles.button_send, loading && { opacity: 0.6 }]} 
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                <Feather name="loader" color="#FFF" size={24} />
+              </Animated.View>
+            ) : (
+              <Text style={styles.text_white}>Entrar</Text>
+            )}
           </TouchableOpacity>
 
 

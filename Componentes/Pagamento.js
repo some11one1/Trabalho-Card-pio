@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Icon from "react-native-vector-icons/Entypo";
@@ -22,6 +22,8 @@ export default function Pagamento({ navigation, route }) {
   const { user } = useContext(AuthContext);
   const { limparCarrinho } = useContext(CarrinhoContext);
   const { chanceMostrarAnuncio } = useAnuncio();
+  const [mostrarModal, setMostrarModal] = useState(false);
+
 
 
   useEffect(() => {
@@ -131,14 +133,12 @@ export default function Pagamento({ navigation, route }) {
 
     if (carrinho) {
       limparCarrinho();
-    } else {
-      // Envia os parâmetros de volta para a tela anterior
-      navigation.goBack();
     }
 
-    alert(`Pagamento confirmado via ${metodo.nome}`);
-    navigation.goBack();
+    setMostrarModal(true);
   };
+
+
 
 
   return (
@@ -228,6 +228,46 @@ export default function Pagamento({ navigation, route }) {
         </TouchableOpacity>
 
       </View>
+      <Modal
+        visible={mostrarModal}
+        transparent
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View
+            style={[styles.modalBox, {
+              backgroundColor: tema.background,
+              borderWidth: 2,
+              borderColor: tema.textoAtivo,
+              borderRadius: 15,
+            }]}>
+
+            <Icon name="check" size={48} color={tema.textoAtivo} />
+
+            <Text style={[styles.modalTitulo, { color: tema.texto }]}>
+              Pagamento confirmado!
+            </Text>
+
+            <Text style={{ color: tema.texto, marginVertical: 10 }}>
+              Método: {metodo?.nome}
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.modalBotao, { backgroundColor: tema.textoAtivo }]}
+              onPress={() => {
+                setMostrarModal(false);
+                navigation.goBack();
+              }}
+            >
+              <Text style={{ color: "#FFF", fontWeight: "bold", fontSize: 16 }}>
+                OK
+              </Text>
+            </TouchableOpacity>
+
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -294,4 +334,32 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontWeight: "bold",
   },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalBox: {
+    width: "85%",
+    padding: 20,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+
+  modalTitulo: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+
+  modalBotao: {
+    marginTop: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+  },
+
 });

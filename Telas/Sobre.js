@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, useWindowDimensions } from "react-native";
 import { usarTheme } from "../Context/ThemeContext";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,12 +7,13 @@ import Nav_Menu from '../Componentes/nav_menu';
 export default function Sobre() {
   const { tema } = usarTheme();
 
-  const widht_title = "55%";
+  const { width, height } = useWindowDimensions();
+  const widht_title = width * 0.6;
 
-  
+
   const estiloNome = {
     color: tema.texto,
-    fontSize: 24,       
+    fontSize: 24,
     marginLeft: 10,
     marginTop: 10,
     marginBottom: 10
@@ -38,7 +39,10 @@ export default function Sobre() {
         justifyContent: 'center',
         padding: 10,
       }}>
-        <Text style={{ color: tema.texto, fontSize: 17, fontWeight: 'bold' }}>
+        <Text
+          umberOfLines={1}
+          adjustsFontSizeToFit
+          style={{ fontSize: width * 1, color: tema.texto, fontWeight: "600", maxWidth: width * 0.9 }}>
           Diretor Geral De Estilização Estrutural e Arquitetura Visual
         </Text>
       </View>
@@ -54,7 +58,10 @@ export default function Sobre() {
         justifyContent: 'center',
         padding: 10,
       }}>
-        <Text style={{ color: tema.texto, fontSize: 17, fontWeight: 'bold' }}>
+        <Text
+          umberOfLines={1}
+          adjustsFontSizeToFit
+          style={{ fontSize: width * 1, color: tema.texto, fontWeight: "600", maxWidth: width * 0.9 }}>
           Engenheiro Principal de Sistemas, Estrutura de código e automoção
         </Text>
       </View>
@@ -70,7 +77,10 @@ export default function Sobre() {
         justifyContent: 'center',
         padding: 10,
       }}>
-        <Text style={{ color: tema.texto, fontSize: 17, fontWeight: 'bold' }}>
+        <Text
+          umberOfLines={1}
+          adjustsFontSizeToFit
+          style={{ fontSize: width * 1, color: tema.texto, fontWeight: "600", maxWidth: width * 0.9 }}>
           Engenheiro Principal De Modelagem, Otimização e Infraestrutura De Dados
         </Text>
       </View>

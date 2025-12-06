@@ -18,8 +18,9 @@ import { useState } from "react";
 import { CarrinhoContext } from "../Context/CarrinhoContext";
 import { usarTheme } from "../Context/ThemeContext";
 import { useAnuncio } from "../Context/AnuncioContext";
+import { useWindowDimensions } from "react-native";
 
-const { width } = Dimensions.get("window");
+
 
 export default function Carrinho({ navigation }) {
   const {
@@ -32,10 +33,13 @@ export default function Carrinho({ navigation }) {
 
   const { chanceMostrarAnuncio } = useAnuncio();
   const { tema } = usarTheme();
+  const [confirmaMsg, setconfirmaMsg] = useState(true);
 
   const totalGeral = carrinho.reduce((acc, item) => acc + Number(item.total || 0), 0);
   const quantidadeTotal = carrinho.reduce((acc, item) => acc + Number(item.quantidade || 0), 0);
   const placeholder = "https://i.imgur.com/3I6eQpA.png";
+
+  const { width, height } = useWindowDimensions();
 
   const [modalVisivel, setModalVisivel] = useState(false);
 
@@ -46,6 +50,7 @@ export default function Carrinho({ navigation }) {
 
   const handleAumentar = (id, produtoEstoque, quantidade) => {
     if (produtoEstoque <= quantidade) {
+      setconfirmaMsg(true);
       setModalVisivel(true);
     } else {
       aumentarQuantidade?.(id);
@@ -56,6 +61,10 @@ export default function Carrinho({ navigation }) {
   const handleDiminuir = (id) => {
     diminuirQuantidade?.(id);
   };
+
+  const mudar = () => {
+    setconfirmaMsg(false);
+  }
 
   const irParaPagamento = async () => {
     await chanceMostrarAnuncio();
@@ -120,7 +129,7 @@ export default function Carrinho({ navigation }) {
           </View>
         </View>
 
-        <View style={styles.right}>
+        <View style={[styles.right, { width: width * 0.28, height: height * 0.14 }]}>
           <Image source={imageSrc} style={styles.image} resizeMode="cover" />
         </View>
       </View>
@@ -134,12 +143,10 @@ export default function Carrinho({ navigation }) {
         <Text style={[styles.headerTitle, { color: tema.texto }]}>Meu Carrinho</Text>
         <TouchableOpacity
           onPress={async () => {
-            await chanceMostrarAnuncio();
             if (!carrinho.length) return;
-            Alert.alert("Limpar Carrinho", "Deseja limpar o carrinho?", [
-              { text: "Cancelar", style: "cancel" },
-              { text: "Limpar", style: "destructive", onPress: () => (typeof limparCarrinho === "function" ? limparCarrinho() : Alert.alert("Limpar", "limparCarrinho não implementado.")) },
-            ]);
+            await chanceMostrarAnuncio();
+            setconfirmaMsg(false);
+            setModalVisivel(true);
           }}
         >
           <Feather name="trash" size={20} color={tema.texto} />
@@ -171,16 +178,6 @@ export default function Carrinho({ navigation }) {
           <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: tema.textoAtivo }]} onPress={irParaPagamento}>
             <Text style={styles.btnPrimaryText}>Finalizar</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.btnOutline, { borderColor: tema.borda }]}
-            onPress={async () => {
-              await chanceMostrarAnuncio();
-              if (typeof limparCarrinho === "function") limparCarrinho();
-            }}
-          >
-            <Text style={[styles.btnOutlineText, { color: tema.texto }]}>Limpar</Text>
-          </TouchableOpacity>
         </View>
       </View>
       <Modal
@@ -189,7 +186,36 @@ export default function Carrinho({ navigation }) {
         visible={modalVisivel}
         onRequestClose={() => setModalVisivel(false)}
       >
-        <TouchableOpacity
+        {confirmaMsg == true ? (
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            onPress={() => setModalVisivel(false)}
+          >
+            <View
+              style={{
+                width: 250,
+                backgroundColor: tema.background,
+                borderRadius: 15,
+                padding: 30,
+                alignItems: "center",
+                justifyContent: "center",
+                elevation: 5,
+                borderWidth: 2,
+                borderColor: tema.textoAtivo
+              }}
+            >
+              <Icon name="box" color={tema.iconEstoque} size={34} />
+              <Text style={{ fontSize: 18, marginBottom: 10, color: tema.texto, fontWeight: "bold" }}>
+                Em falta no estoque!
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ) : (<TouchableOpacity
           style={{
             flex: 1,
             backgroundColor: "rgba(0,0,0,0.5)",
@@ -212,11 +238,34 @@ export default function Carrinho({ navigation }) {
             }}
           >
             <Icon name="box" color={tema.iconEstoque} size={34} />
-            <Text style={{ fontSize: 18, marginBottom: 10, color: tema.texto, fontWeight: "bold" }}>
-              Em falta no estoque!
+            <Text
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={{ color: tema.texto, fontSize: width * 1, fontWeight: "bold", maxWidth: width * 1 }}>
+              Deseja limpar o carrinho?
             </Text>
+            <View style={{ flexDirection: 'row', marginTop: 15, gap: 10 }}>
+              <TouchableOpacity
+                style={{ padding: 10, borderRadius: 8, backgroundColor: '#DC2626' }}
+                onPress={() => {
+                  limparCarrinho();
+                  setModalVisivel(false);
+                }}
+              >
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Limpar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{ padding: 10, borderRadius: 8, backgroundColor: tema.borda }}
+                onPress={() => setModalVisivel(false)}
+              >
+                <Text style={{ color: tema.texto, fontWeight: 'bold' }}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </TouchableOpacity>
+        )}
+
       </Modal>
     </SafeAreaView>
   );
@@ -252,7 +301,7 @@ const styles = StyleSheet.create({
   },
 
   left: { flex: 1, paddingRight: 12 },
-  right: { width: width * 0.28, height: width * 0.22, borderRadius: 12, overflow: "hidden" },
+  right: { borderRadius: 12, overflow: "hidden" },
 
   title: { fontSize: 16, fontWeight: "800", marginBottom: 4 },
   subtitle: { fontSize: 12, color: "#888", marginBottom: 6 },

@@ -5,12 +5,17 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  useWindowDimensions,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { usarTheme } from "../Context/ThemeContext";
 import { AuthContext } from "../Context/AuthContext";
 import { supabase } from "../Supabase";
+
 export default function ConfigUsuarios() {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+
   const { CriarUsuario, TrocarEstadoUser, ListarUsuarios, usuarios } =
     useContext(AuthContext);
   const { tema, isModoEscuro } = usarTheme();
@@ -31,15 +36,13 @@ export default function ConfigUsuarios() {
           schema: "public",
           table: "usuarios",
         },
-        (payload) => {
-          console.log(payload);
+        () => {
           ListarUsuarios();
         }
       )
       .subscribe();
-    return () => {
-      supabase.removeChannel(canal);
-    };
+
+    return () => supabase.removeChannel(canal);
   }, []);
 
   const handleCriarUsuario = async () => {
@@ -52,7 +55,6 @@ export default function ConfigUsuarios() {
       alert("Erro ao criar usuário, Usuário já existe.");
       return;
     }
-    ListarUsuarios();
     setUsername("");
     setSenha("");
     setIs_Admin(false);
@@ -61,9 +63,20 @@ export default function ConfigUsuarios() {
   const corDeletar = isModoEscuro ? "#FFFFFF" : tema.perigo;
 
   return (
-    <View style={[styles.container, { backgroundColor: tema.background }]}>
-      <View style={styles.criarContainer}>
-        <Text style={[styles.title, { color: tema.texto }]}>Criar Usuário</Text>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: tema.background,
+          flexDirection: isTablet ? "row" : "column",
+        },
+      ]}
+    >
+      {/* ✅ Criar usuário */}
+      <View style={[styles.card, isTablet && styles.cardTablet]}>
+        <Text style={[styles.title, { color: tema.texto }]}>
+          Criar Usuário
+        </Text>
 
         <TextInput
           style={[styles.input, { borderColor: tema.texto, color: tema.texto }]}
@@ -101,7 +114,8 @@ export default function ConfigUsuarios() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.listaContainer}>
+      {/* ✅ Lista */}
+      <View style={[styles.card, isTablet && styles.cardTablet]}>
         <Text style={[styles.title, { color: tema.texto }]}>
           Lista de Usuários
         </Text>
@@ -109,20 +123,28 @@ export default function ConfigUsuarios() {
         <FlatList
           data={usuarios}
           keyExtractor={(item) => item.id.toString()}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <View
-              style={[styles.usuarioItem, { borderColor: tema.textoAtivo }]}
+              style={[
+                styles.usuarioItem,
+                { borderColor: tema.textoAtivo },
+              ]}
             >
-              <Text style={{ color: tema.texto }}>
-                {item.username} - {item.is_admin ? "Admin" : "User"} -{" "}
+              <Text
+                style={{ color: tema.texto, flex: 1, marginRight: 6 }}
+                numberOfLines={1}
+              >
+                {item.username} •{" "}
+                {item.is_admin ? "Admin" : "User"} •{" "}
                 {item.ativo ? "Ativo" : "Desativado"}
               </Text>
+
               <TouchableOpacity
                 style={[styles.deletarButton, { borderColor: corDeletar }]}
                 onPress={() => TrocarEstadoUser(item.id)}
               >
                 <Text style={{ color: corDeletar }}>
-                  {" "}
                   {item.ativo ? "Desativar" : "Ativar"}
                 </Text>
               </TouchableOpacity>
@@ -137,52 +159,56 @@ export default function ConfigUsuarios() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
-    padding: 20,
-    justifyContent: "space-between",
+    padding: 16,
+    gap: 12,
   },
-  criarContainer: {
+
+  card: {
     flex: 1,
+    borderRadius: 12,
+    padding: 16,
     gap: 10,
   },
-  listaContainer: {
-    flex: 1,
-    gap: 10,
+
+  cardTablet: {
+    marginHorizontal: 6,
   },
+
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
   },
+
   input: {
     borderWidth: 1,
     borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    marginBottom: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
   },
+
   toggleButton: {
     borderWidth: 1,
     borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    paddingVertical: 8,
     alignItems: "center",
   },
+
   criarButton: {
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
+    marginTop: 6,
   },
+
   usuarioItem: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 10,
-    marginBottom: 5,
+    marginBottom: 6,
   },
+
   deletarButton: {
     borderWidth: 1,
     borderRadius: 8,
