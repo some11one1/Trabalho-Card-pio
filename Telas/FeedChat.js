@@ -17,6 +17,7 @@ import { AuthContext } from "../Context/AuthContext";
 import Rainbow from "../Componentes/Rainbow";
 import RainbowHighlight from "../Componentes/RainbowHighlight";
 import { FontAwesome5 } from "@expo/vector-icons";
+import Nav_Menu from "../Componentes/nav_menu";
 
 /* ========= ITEM ========= */
 const MessageItem = memo(({ item, tema }) => {
@@ -110,6 +111,8 @@ export default function Chat() {
         paddingBottom: keyboardHeight,
       }}
     >
+      <Nav_Menu />
+
       <FlatList
         ref={flatListRef}
         data={mensagens}

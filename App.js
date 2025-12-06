@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthProvider, AuthContext } from "./Context/AuthContext";
 import { ThemeProvider, usarTheme } from "./Context/ThemeContext";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+
 import Chat from "./Telas/FeedChat";
-import { supabase } from "./Supabase";
 import ConfigUsuarios from "./Telas/ConfigUsuarios";
 import AdminHome from "./Telas/AdminHome";
 import Home from "./Telas/Home";
@@ -16,264 +16,136 @@ import Perfil from "./Telas/Perfil";
 import Historico from "./Telas/Historico";
 import Carrinho from "./Telas/Carrinho";
 import Sobre from "./Telas/Sobre";
-
 import Configuracoes from "./Telas/Configuracoes";
-import { FontAwesome } from "@expo/vector-icons";
 import Ticket from "./Telas/Ticket";
+
+import { FontAwesome } from "@expo/vector-icons";
 import { useContext, useState } from "react";
-import { View, Text, Modal, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from "react-native";
+import {
+  View,
+  Text,
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
+  useWindowDimensions,
+} from "react-native";
+
 import { ProdutosProvider } from "./Context/produtoContext";
-import { Button } from "react-native-web";
-import { WalletContext, WalletProvider } from "./Context/WalletContext";
-import CardProduto from "./Componentes/CardProduto";
-import Pagamento from "./Componentes/Pagamento";
+import { WalletProvider } from "./Context/WalletContext";
 import { TicketProvider } from "./Context/TicketContext";
-import { SegredoProvider } from "./indexx";
 import { HistoricoProvider } from "./Context/HistoricoContext";
 import { CarrinhoProvider } from "./Context/CarrinhoContext";
 import { AnuncioProvider } from "./Context/AnuncioContext";
 import { ChatProvider } from "./Context/ChatContext";
 
-// Tabs
-//cada Tab.Screen é uma aba, com nome e componente, componente é o que foi importando lá em cima, tem que ser mesmo nome, já o name tanto faz
+import CardProduto from "./Componentes/CardProduto";
+import Pagamento from "./Componentes/Pagamento";
 
-const Tab = createBottomTabNavigator(); // o const Tab cria o navegador de abas (tabs) é a coisa que fica la em baixo do app pra alterar entre si quando aperta, tipo home, historico, etc
-// função que retorna as tabs pro usuario normal]
-//cria o navegador de abas}
+
+const Tab = createBottomTabNavigator();
 
 export const UserTabs = () => {
   const { tema } = usarTheme();
-
-  const tamanhoIcone = 20;
-
   const insets = useSafeAreaInsets();
 
   const renderIcon =
     (name) =>
-      ({ focused, color, size }) => {
-        // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
-        return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
-      };
+      ({ color }) =>
+        <FontAwesome name={name} size={20} color={color} />;
 
   return (
     <Tab.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: tema.background },
-        headerTintColor: tema.texto,
         headerShown: false,
         tabBarStyle: {
           backgroundColor: tema.background,
           borderTopWidth: 0,
-          elevation: -5,
           paddingBottom: insets.bottom + 6,
           height: 60 + insets.bottom,
         },
         tabBarActiveTintColor: tema.textoAtivo,
         tabBarInactiveTintColor: tema.texto,
-
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "bold",
-        },
-        
       }}
     >
-      <Tab.Screen
-        name="HomeTab"
-        component={Home}
-        options={({ navigation }) => ({
-          headerShown: false,
-          tabBarIcon: renderIcon("home"),
-        })}
-      />
-      <Tab.Screen
-        name="Histórico"
-        component={Historico}
-        options={({ navigation }) => ({
-          headerShown: false,
-          tabBarIcon: renderIcon("history"),
-        })}
-      />
-      <Tab.Screen
-        name="Carrinho"
-        component={Carrinho}
-        options={({ navigation }) => ({
-          headerShown: false,
-          tabBarIcon: renderIcon("shopping-cart"),
-        })}
-      />
-      <Tab.Screen
-        name="Configurações"
-        component={Configuracoes}
-        options={({ navigation }) => ({
-          headerShown: false,
-          tabBarIcon: renderIcon("cog"),
-        })}
-      />
+      <Tab.Screen name="HomeTab" component={Home} options={{ tabBarIcon: renderIcon("home") }} />
+      <Tab.Screen name="Histórico" component={Historico} options={{ tabBarIcon: renderIcon("history") }} />
+      <Tab.Screen name="Carrinho" component={Carrinho} options={{ tabBarIcon: renderIcon("shopping-cart") }} />
+      <Tab.Screen name="Configurações" component={Configuracoes} options={{ tabBarIcon: renderIcon("cog") }} />
     </Tab.Navigator>
   );
 };
 
-// mesma coisa só que pro admin
 export const AdminTabs = () => {
-  const { isModoEscuro } = usarTheme();
-  const temaAdaptativo = isModoEscuro ? "#121212" : "#EDEDED";
-  const temaAdaptativoTexto = isModoEscuro ? "#EDEDED" : "#121212";
-
-  const tamanhoIcone = 20;
-
   const renderIcon =
     (name) =>
-      ({ focused, color, size }) => {
-        // Aqui usamos o nome do ícone e as propriedades fornecidas pelo React Navigation
-        return <FontAwesome name={name} size={tamanhoIcone} color={color} />;
-      };
+      ({ color }) =>
+        <FontAwesome name={name} size={20} color={color} />;
+
+  const { tema } = usarTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: temaAdaptativo }, // muda a cor do header conforme o tema
-        headerTintColor: temaAdaptativoTexto, // muda a cor do texto do header conforme o tema
-        tabBarStyle: { backgroundColor: temaAdaptativo }, // muda a cor da tab bar conforme o tema
-        tabBarActiveTintColor: isModoEscuro ? "#869cfcff" : "#314096ff", // muda a cor do texto ativo (ativo = quando selecionado) da tab conforme o tema
-        tabBarInactiveTintColor: temaAdaptativoTexto, // muda a cor do texto inativo (inativo = quando nao selecionado) da tab conforme o tema
-      }}
-    >
-      <Tab.Screen
-        name="Gerenciar Cardápio"
-        component={AdminHome}
-        options={{
-          headerShown: false,
-          tabBarIcon: renderIcon("tasks"),
-        }}
-      />
-      <Tab.Screen
-        name="Configurar Usuários"
-        component={ConfigUsuarios}
-        options={({ navigation }) => ({
-          headerShown: false,
-          tabBarIcon: renderIcon("users"),
-        })}
-      />
-      <Tab.Screen
-        name="Configurações"
-        component={Configuracoes}
-        options={({ navigation }) => ({
-          headerShown: false,
-          tabBarIcon: renderIcon("cog"),
-        })}
-      />
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: tema.background,
+          borderTopWidth: 0,
+          paddingBottom: insets.bottom + 6,
+          height: 60 + insets.bottom,
+        },
+        tabBarActiveTintColor: tema.textoAtivo,
+        tabBarInactiveTintColor: tema.texto,
+      }}>
+      <Tab.Screen name="Gerenciar Cardápio" component={AdminHome} options={{ tabBarIcon: renderIcon("tasks") }} />
+      <Tab.Screen name="Usuários" component={ConfigUsuarios} options={{ tabBarIcon: renderIcon("users") }} />
+      <Tab.Screen name="Configurações" component={Configuracoes} options={{ tabBarIcon: renderIcon("cog") }} />
     </Tab.Navigator>
   );
 };
 
-const Drawer = createDrawerNavigator(); // mesmo que o tab, só que pro drawer (menu lateral)
-// função que retorna o drawer, que vai ter as tabs dentro e diferente se for admin ou user
-// pega o estado do usuario do AuthContext para saber se é adz  min ou user
-// define quais serão as TABS (linha 28) baseado se o usuario é admin ou não | o user? vê se o user existe, server pra nao dar erro caso ele naoe exista
-
-const stylesModal = StyleSheet.create({
 
 
-
-  buttonContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 10,
-  },
-});
+const Drawer = createDrawerNavigator();
 
 const HomeDrawer = () => {
   const { tema } = usarTheme();
   const { user, logout } = useContext(AuthContext);
   const [modalLogoutVisivel, setModalLogoutVisivel] = useState(false);
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
-  const confirmarLogout = () => {
-    setModalLogoutVisivel(true);
-  };
-
-  const handleLogout = () => {
-    setModalLogoutVisivel(false);
-    logout();
-  };
-
-  function FuncaoInutilSoPraResolverUmErroDaTelaDeSair() {
-    // 3. O componente é agora onde o Modal será renderizado
-    return null;
-  }
   return (
     <>
       <Drawer.Navigator
-        screenOptions={() => ({
-          headerStyle: { backgroundColor: tema.background }, // muda a cor do header conforme o tema
-          headerTintColor: tema.texto, // muda a cor do texto do header conforme o tema
-          drawerStyle: {
-            // muda a cor do drawer conforme o tema
-            backgroundColor: tema.background,
-          },
-          drawerActiveTintColor: tema.textoAtivo, // muda a cor do texto ativo (ativo = quando selecionado) do drawer conforme o tema
-          drawerInactiveTintColor: tema.texto, // muda a cor do texto inativo (inativo = quando nao selecionado) do drawer conforme o tema
-        })}
-      >
-        <Drawer.Screen
-          name="Home"
-          component={user?.role === "admin" ? AdminTabs : UserTabs}
-          options={() => ({
-            headerShown: false,
-          })}
-        />
-        {user?.role !== "admin" && (
-          <Drawer.Screen
-            name="Ticket"
-            component={Ticket}
-            options={{ headerShown: false }}
-          />
-        )}
-        <Drawer.Screen
-          name="Perfil"
-          component={Perfil}
-          options={() => ({
-            headerShown: false,
-          })}
-        />
-        <Drawer.Screen
-          name="Chat"
-          component={Chat}
-          options={{
-            headerShown: true,
-            title: "Chat Global",
-          }}
-        />
-        <Drawer.Screen
-          name="Sobre"
-          component={Sobre}
-          options={() => ({
-            headerShown: false,
-          })}
-        />
+        screenOptions={{
+          headerShown: false,
+          headerStyle: { backgroundColor: tema.background },
+          headerTintColor: tema.texto,
+          drawerStyle: { backgroundColor: tema.background, },
+          drawerActiveTintColor: tema.textoAtivo,
+          drawerInactiveTintColor: tema.texto,
+        }}>
+        <Drawer.Screen name="Home" component={user?.role === "admin" ? AdminTabs : UserTabs} />
+        {user?.role !== "admin" && <Drawer.Screen name="Ticket" component={Ticket} />}
+        <Drawer.Screen name="Perfil" component={Perfil} />
+        <Drawer.Screen name="Chat" component={Chat} />
+        <Drawer.Screen name="Sobre" component={Sobre} />
 
         <Drawer.Screen
-          name="sair"
-          component={FuncaoInutilSoPraResolverUmErroDaTelaDeSair} //componente nulo pq n tem tela pro logout
-          options={{
-            drawerLabel: "Sair", //nome que aparece no drawer
-          }}
+          name="Sair"
+          component={() => null}
           listeners={{
             drawerItemPress: (e) => {
-              //quando clicar no item do drawer
-              e.preventDefault(); //impede a navegação padrão
-              confirmarLogout();
+              e.preventDefault();
+              setModalLogoutVisivel(true);
             },
           }}
         />
-
-
       </Drawer.Navigator>
+
+
       <Modal
-        transparent={true}
+        transparent
         animationType="fade"
         visible={modalLogoutVisivel}
         onRequestClose={() => setModalLogoutVisivel(false)}
@@ -284,7 +156,8 @@ const HomeDrawer = () => {
             backgroundColor: "rgba(0,0,0,0.5)",
             justifyContent: "center",
             alignItems: "center",
-          }}>
+          }}
+        >
           <View
             style={{
               width: width * 0.8,
@@ -295,20 +168,43 @@ const HomeDrawer = () => {
               justifyContent: "center",
               elevation: 5,
               borderWidth: 2,
-              borderColor: tema.textoAtivo
-            }}>
+              borderColor: tema.textoAtivo,
+            }}
+          >
             <Text
               numberOfLines={1}
               adjustsFontSizeToFit
-              style={{ fontSize: width * 0.06, marginBottom: 10, color: tema.texto, fontWeight: "bold", maxWidth: width * 0.8 }}>
+              style={{
+                fontSize: width * 0.06,
+                marginBottom: 10,
+                color: tema.texto,
+                fontWeight: "bold",
+                maxWidth: width * 0.8,
+              }}
+            >
               Deslogar
             </Text>
+
             <Text
               numberOfLines={1}
               adjustsFontSizeToFit
-              style={{ fontSize: width * 0.03, marginBottom: 10, color: tema.texto, fontWeight: "bold", maxWidth: width * 0.8 }}>Você tem certeza que quer Deslogar?</Text>
+              style={{
+                fontSize: width * 0.03,
+                marginBottom: 10,
+                color: tema.texto,
+                fontWeight: "bold",
+                maxWidth: width * 0.8,
+              }}
+            >
+              Você tem certeza que quer Deslogar?
+            </Text>
 
-            <View style={[stylesModal.buttonContainer, { width: width * 0.5 }]}>
+            <View
+              style={[
+                styles.buttonContainer,
+                { width: width * 0.5 },
+              ]}
+            >
               <TouchableOpacity
                 style={{
                   width: width * 0.2,
@@ -325,7 +221,15 @@ const HomeDrawer = () => {
                 <Text
                   numberOfLines={1}
                   adjustsFontSizeToFit
-                  style={{ fontSize: width * 0.09, color: tema.texto, fontWeight: "bold", maxWidth: width * 0.15 }}>Não</Text>
+                  style={{
+                    fontSize: width * 0.09,
+                    color: tema.texto,
+                    fontWeight: "bold",
+                    maxWidth: width * 0.15,
+                  }}
+                >
+                  Não
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -335,16 +239,24 @@ const HomeDrawer = () => {
                   borderColor: tema.textoAtivo,
                   borderWidth: 1,
                   borderRadius: 10,
+                  padding: width * 0.03,
                   alignItems: "center",
                   justifyContent: "center",
-                  padding: width * 0.03,
                 }}
-                onPress={handleLogout}
+                onPress={logout}
               >
                 <Text
                   numberOfLines={1}
                   adjustsFontSizeToFit
-                  style={{ fontSize: width * 0.09, color: tema.texto, fontWeight: "bold", maxWidth: width * 0.15 }}>Sim</Text>
+                  style={{
+                    fontSize: width * 0.09,
+                    color: tema.texto,
+                    fontWeight: "bold",
+                    maxWidth: width * 0.15,
+                  }}
+                >
+                  Sim
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -354,13 +266,15 @@ const HomeDrawer = () => {
   );
 };
 
-// Stack
+
+
 const Stack = createNativeStackNavigator();
+
 const AppStack = () => {
   const { user } = useContext(AuthContext);
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {/*SE tiver um usuario, vai pra HOME direto, se não tiver, vai  pro Login */}
       {!user ? (
         <Stack.Screen name="Login" component={Login} />
       ) : (
@@ -372,7 +286,47 @@ const AppStack = () => {
   );
 };
 
-// App principal
+
+
+const SessaoEncerradaModal = () => {
+  const { modalSessaoEncerrada, setModalSessaoEncerrada, mensagemSessao } = useContext(AuthContext);
+  const { width } = useWindowDimensions();
+  const { tema } = usarTheme();
+
+  return (
+    <Modal transparent animationType="fade" visible={modalSessaoEncerrada}>
+      <View style={styles.overlay}>
+        <View style={[styles.modalBox, { width: width * 0.8, backgroundColor: tema.background, borderWidth: 2, borderColor: tema.textoAtivo }]}>
+          <Text
+            umberOfLines={1}
+            adjustsFontSizeToFit
+            style={{ fontSize: width * 0.05, marginBottom: 10, color: tema.texto, fontWeight: "bold", maxWidth: width * 0.6 }}>Sessão encerrada</Text>
+          <Text
+            umberOfLines={1}
+            adjustsFontSizeToFit
+            style={{ fontSize: width * 0.02, marginBottom: 10, color: tema.texto, fontWeight: "bold", maxWidth: width * 1 }}>{mensagemSessao}</Text>
+
+          <TouchableOpacity
+            onPress={() => setModalSessaoEncerrada(false)}
+            style={{
+              backgroundColor: tema.cardBackground,
+              borderColor: tema.textoAtivo,
+              borderWidth: 1,
+              borderRadius: 10,
+              paddingVertical: width * 0.03,
+              alignItems: "center",
+            }}>
+            <Text
+              umberOfLines={1}
+              adjustsFontSizeToFit
+              style={{ fontSize: width * 0.05, color: tema.texto, fontWeight: "600", maxWidth: width * 0.2 }}>OK</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal >
+  );
+};
+
 export default function App() {
   return (
     <SafeAreaProvider>
@@ -387,6 +341,7 @@ export default function App() {
                       <ChatProvider>
                         <NavigationContainer>
                           <AppStack />
+                          <SessaoEncerradaModal />
                         </NavigationContainer>
                       </ChatProvider>
                     </HistoricoProvider>
@@ -400,3 +355,45 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBox: {
+    padding: 25,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  text: {
+    fontSize: 15,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  row: {
+    flexDirection: "row",
+    gap: 30,
+  },
+  btn: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+   buttonContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 10,
+  },
+});

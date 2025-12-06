@@ -1,40 +1,46 @@
-//AuthContext é um autenticador que guarda o estado do usuario (logado ou não, e se é admin ou não)
+// AuthContext é um autenticador que guarda o estado do usuario
 import { createContext, useState, useEffect } from "react";
-import { Alert, Platform } from "react-native";
+import { Platform } from "react-native";
 import { supabase } from "../Supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-export const AuthContext = createContext(); //cria o contexto
 
-// cria o provider q é um coponente que envolve todo o app
+export const AuthContext = createContext();
+
 export const AuthProvider = ({ children }) => {
-  // children é todo o app
-  //estado do usuario
-  const [user, setUser] = useState(null); // cria um estado pro usuario, por padrão é null ou seja, ninguem logado
+  const [user, setUser] = useState(null);
   const [carregando, setCarregando] = useState(true);
+  const [usuarios, setUsuarios] = useState([]);
   const [NovoAtivo, setNovoAtivo] = useState(true);
+
+  // 🔴 ESTADOS DO MODAL
+  const [modalSessaoEncerrada, setModalSessaoEncerrada] = useState(false);
+  const [mensagemSessao, setMensagemSessao] = useState("");
+
+  // ✅ CARREGAR USUÁRIO SALVO
   useEffect(() => {
     const carregarUsuario = async () => {
       try {
         const usuarioSalvo = await AsyncStorage.getItem("usuario");
 
         if (usuarioSalvo) {
-          const user = JSON.parse(usuarioSalvo);
+          const usuario = JSON.parse(usuarioSalvo);
 
           const { data, error } = await supabase
             .from("usuarios")
             .select("ativo")
-            .eq("id", user.id)
+            .eq("id", usuario.id)
             .single();
 
           if (error || !data || data.ativo === false) {
             await AsyncStorage.removeItem("usuario");
             setUser(null);
-            Alert.alert(
-              "Sessão encerrada",
+
+            setMensagemSessao(
               "Seu usuário foi desativado por um administrador."
             );
+            setModalSessaoEncerrada(true);
           } else {
-            setUser(user);
+            setUser(usuario);
           }
         }
       } catch (error) {
@@ -46,6 +52,8 @@ export const AuthProvider = ({ children }) => {
 
     carregarUsuario();
   }, []);
+
+  // ✅ MONITORAR DESATIVAÇÃO EM TEMPO REAL
   useEffect(() => {
     if (!user) return;
 
@@ -64,10 +72,10 @@ export const AuthProvider = ({ children }) => {
             await AsyncStorage.removeItem("usuario");
             setUser(null);
 
-            Alert.alert(
-              "Sessão encerrada",
-              "Seu usuário foi desativado por um dministrador."
+            setMensagemSessao(
+              "Seu usuário foi desativado por um administrador."
             );
+            setModalSessaoEncerrada(true);
           }
         }
       )
@@ -77,133 +85,146 @@ export const AuthProvider = ({ children }) => {
       supabase.removeChannel(channel);
     };
   }, [user]);
-  // função pra logar
-  const loginUser = async (username, senha) => {
-    // async significa que a função é assíncrona, ou seja, pode demorar pra responder e que não trava o código enquanto espera resposta E permite usar await
-    const { data, error } = await supabase // o await espera a resposta do supabase | o data é um objeto com os dados retornados
-      .from("usuarios") // da tabela usuarios, pega o usuario com esse username e senha
-      .select("*") // seleciona tudo
-      .eq("username", username) // filtro por username
-      .eq("senha", senha) // filtro por senha
-      .single(); // pega só um
 
-    if (error || !data) {
-      return false; // retorna falso se der erro ou n achar usuario
-    }
+  // ✅ LOGIN
+  const loginUser = async (username, senha) => {
+    const { data, error } = await supabase
+      .from("usuarios")
+      .select("*")
+      .eq("username", username)
+      .eq("senha", senha)
+      .single();
+
+    if (error || !data) return false;
+
     if (data.ativo === false) {
       return { error: "Este usuário está desativado" };
     }
-    const isAdmin = Boolean(data.is_admin); // converte em booleano (nem deve fazer diferença pq ja é booleano no SupaBase ahhhhhh (odeio esse java.lang ain ain nao pode ser string)
+
     const usuarioAtualizado = {
       id: data.id,
       username: data.username,
-      role: isAdmin ? "admin" : "user",
-      is_admin: isAdmin,
+      role: data.is_admin ? "admin" : "user",
+      is_admin: !!data.is_admin,
       foto_url: data.foto_url || null,
     };
 
     setUser(usuarioAtualizado);
-    await AsyncStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+    await AsyncStorage.setItem(
+      "usuario",
+      JSON.stringify(usuarioAtualizado)
+    );
 
     return true;
   };
 
-  // func pra deslogar
-  const logout = () => {
-    setUser(null); // uau! se voce clicar pra sair da sua conta, o app voltar a ficar sem contar, mágica! (não esquecer de colocar isso no botão de logout depois)
-    AsyncStorage.removeItem("usuario"); // remove o usuario salvo no AsyncStorage
+  // ✅ LOGOUT
+  const logout = async () => {
+    setUser(null);
+    await AsyncStorage.removeItem("usuario");
   };
+
+  // ✅ ATUALIZAR PERFIL
   const atualizarUsuario = async (dadosNovos) => {
     if (!user) return false;
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("usuarios")
       .update(dadosNovos)
-      .eq("id", user.id)
-      .single();
+      .eq("id", user.id);
 
     if (error) {
       console.log("Erro ao atualizar usuário:", error);
       return false;
     }
 
-    const usuarioAtualizado = {
-      ...user,
-      ...dadosNovos,
-    };
+    const usuarioAtualizado = { ...user, ...dadosNovos };
 
     setUser(usuarioAtualizado);
-
-    await AsyncStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+    await AsyncStorage.setItem(
+      "usuario",
+      JSON.stringify(usuarioAtualizado)
+    );
 
     return true;
   };
-  // funcao pro admin criar usúarios
+
+  // ✅ CRIAR USUÁRIO (ADMIN)
   const CriarUsuario = async (username, senha, is_admin = false) => {
-    //usa os parametros username, senha e is_admin pra fazer o novo usuario
-    //  função que pega username, senha e is_admin (padrão é falso)
-    const { data, error } = await supabase
-      .from("usuarios") // da tabela usuarios
-      // insere um novo usuario com username, senha e se é admin ou não (vai dar dorzinha de cabeça fazer isso depois)
-      .insert([{ username, senha, is_admin: !!is_admin }]); // o !!is_admin transforma em booleano (99% de chance de nao fazer nada pq ja é booleano no SupaBase ent dava pra deixar só is_admin msm)
+    const { error } = await supabase.from("usuarios").insert([
+      {
+        username,
+        senha,
+        is_admin: !!is_admin,
+        ativo: true,
+      },
+    ]);
 
     if (error) {
-      // meu deus???  e se der erro???? o que acontece se der erro???
-      console.log("Erro ao criar usuario:", error); // absolute cinema
+      console.log("Erro ao criar usuário:", error);
       return false;
     }
-    return true; // retorna que deu certo, isso significa que o usuario foi criado com sucesso
-  };
-  const [usuarios, setUsuarios] = useState([]);
-  const TrocarEstadoUser = async (userId) => {
-    if (user && user.id === userId) {
-      if (Platform.OS === "web") {
-        alert(
-          "Você não pode desativar você mesmo. seu curioso, achou que ia conseguir? achou errado ótario"
-        );
-      } else {
-        Alert.alert(
-          "Erro",
-          "Você não pode desativar você mesmo. seu curioso, achou que ia conseguir? achou errado ótario"
-        );
-      }
-      return false; // impede o usuario de se desativar
-    }
-    setNovoAtivo(!NovoAtivo);
-    const { data, error } = await supabase
 
+    return true;
+  };
+
+  // ✅ ATIVAR / DESATIVAR USUÁRIO
+  const TrocarEstadoUser = async (userId) => {
+    if (user?.id === userId) {
+      if (Platform.OS === "web") {
+        alert("Você não pode se desativar.");
+      } else {
+        alert("Você não pode se desativar.");
+      }
+      return false;
+    }
+
+    setNovoAtivo(!NovoAtivo);
+
+    const { error } = await supabase
       .from("usuarios")
       .update({ ativo: !NovoAtivo })
       .eq("id", userId);
+
     if (error) {
-      console.log("Erro ao desativar usuario:", error);
+      console.log("Erro ao alterar estado do usuário:", error);
       return false;
     }
+
+    return true;
   };
+
+  // ✅ LISTAR USUÁRIOS
   const ListarUsuarios = async () => {
     const { data, error } = await supabase.from("usuarios").select("*");
+
     if (error) {
-      console.log("Erro ao listar usuarios:", error);
-      return []; // retorna array vazio em caso de erro
+      console.log("Erro ao listar usuários:", error);
+      return [];
     }
-    setUsuarios(data); // atualiza o estado com a lista de usuarios
+
+    setUsuarios(data);
     return data;
   };
-  // retorna o user (estado do usuario), loginUser (função de logar), logout (função de deslogar) e CriarUsuario (função de criar usuario) pro resto do app
-  //como por exemplo  foi usado no App.js e o Login.js
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        carregando,
+        usuarios,
+
         loginUser,
         logout,
+        atualizarUsuario,
         CriarUsuario,
         TrocarEstadoUser,
         ListarUsuarios,
-        usuarios,
-        carregando,
-        atualizarUsuario,
+
+        // 🔴 MODAL
+        modalSessaoEncerrada,
+        setModalSessaoEncerrada,
+        mensagemSessao,
       }}
     >
       {children}
